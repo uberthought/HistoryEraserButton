@@ -13,9 +13,36 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="History Eraser Button"
+        android:text="Add To Database"
         android:id="@+id/button"
-        android:layout_centerVertical="true"
+        android:onClick="addToDatabaseOnClick"
+        android:layout_alignTop="@+id/button2"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Read Database"
+        android:id="@+id/button2"
+        android:onClick="readFromDatabaseOnClick"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/textView"
+        android:layout_toEndOf="@+id/textView" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Text"
+        android:id="@+id/textView"
+        android:layout_below="@+id/button2"
+        android:layout_toRightOf="@+id/button"
+        android:layout_toEndOf="@+id/button" />
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/listView"
         android:layout_centerHorizontal="true"
-        android:onClick="buttonOnClick" />
+        android:layout_below="@+id/textView" />
 </RelativeLayout>
