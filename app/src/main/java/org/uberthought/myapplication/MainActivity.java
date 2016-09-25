@@ -5,19 +5,18 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.table.TableUtils;
 
 import java.sql.SQLException;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
+
+    private MainDBHelper databaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,10 +30,10 @@ public class MainActivity extends AppCompatActivity {
     public void addToDatabaseOnClick(View view) {
 
         try {
-            MainDBHelper todoOpenDatabaseHelper = OpenHelperManager.getHelper(this, MainDBHelper.class);
-            Dao<SimpleRecord, Long> simpleRecordDao = todoOpenDatabaseHelper.getDao();
+            Dao<SimpleRecord, Long> simpleRecordDao = getDatabaseHelper().getDao();
 
             Date currDateTime = new Date(System.currentTimeMillis());
+
             simpleRecordDao.create(new SimpleRecord(currDateTime, "Note 1"));
         } catch (SQLException e) {
             e.printStackTrace();
@@ -49,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
     void UpdateListView()
     {
         try {
-            List<SimpleRecord> simpleRecords = getAllSimpleRecords();
+            List<SimpleRecord> simpleRecords = getDatabaseHelper().getAllSimpleRecords();
             SimpleRecord[] simpleRecordArray = simpleRecords.toArray(new SimpleRecord[simpleRecords.size()]);
 
             ListView listView = (ListView)findViewById(R.id.listView);
@@ -67,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
 
     int entryCount() {
         try {
-            List<SimpleRecord> simpleRecords = getAllSimpleRecords();
+            List<SimpleRecord> simpleRecords = getDatabaseHelper().getAllSimpleRecords();
             return simpleRecords.size();
 
         } catch (SQLException e) {
@@ -76,11 +75,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private List<SimpleRecord> getAllSimpleRecords() throws SQLException {
-        MainDBHelper todoOpenDatabaseHelper = OpenHelperManager.getHelper(this, MainDBHelper.class);
-        Dao<SimpleRecord, Long> simpleRecordDao = todoOpenDatabaseHelper.getDao();
-
-        // read
-        return simpleRecordDao.queryForAll();
+    MainDBHelper getDatabaseHelper() {
+        if (databaseHelper == null)
+            databaseHelper = OpenHelperManager.getHelper(this, MainDBHelper.class);
+        return databaseHelper;
     }
 }

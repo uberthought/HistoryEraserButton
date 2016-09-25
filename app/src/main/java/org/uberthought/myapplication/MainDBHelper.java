@@ -9,6 +9,7 @@ import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 
 import java.sql.SQLException;
+import java.util.List;
 
 class MainDBHelper extends OrmLiteSqliteOpenHelper {
 
@@ -59,4 +60,8 @@ class MainDBHelper extends OrmLiteSqliteOpenHelper {
             }
             return simpleRecordDao;
         }
+
+    List<SimpleRecord> getAllSimpleRecords() throws SQLException {
+        return getDao().queryForAll();
     }
+}
