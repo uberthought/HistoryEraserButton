@@ -9,24 +9,10 @@ import java.util.Date;
 @DatabaseTable(tableName = "mainDB")
 class SimpleRecord {
 
-    @DatabaseField(generatedId = true)
+    @DatabaseField(generatedId = true, columnName = "_id")
     private Long id;
-
-    public Long getId() {
-        return id;
-    }
-
-    Date getDateCreated() {
-        return dateCreated;
-    }
-
-    public String getNote() {
-        return note;
-    }
-
     @DatabaseField
-    private Date dateCreated;
-
+    private Long dateOffset;
     @DatabaseField
     private String note;
 
@@ -35,7 +21,23 @@ class SimpleRecord {
     }
 
     SimpleRecord(Date dateCreated, String note) {
-        this.dateCreated = dateCreated;
+        this.dateOffset = dateCreated.getTime();
         this.note = note;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    Long getDateOffset() {
+        return dateOffset;
+    }
+
+    Date getDate() {
+        return new Date(dateOffset);
     }
 }

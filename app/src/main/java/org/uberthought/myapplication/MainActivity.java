@@ -1,5 +1,6 @@
 package org.uberthought.myapplication;
 
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -27,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void addToDatabaseOnClick(View view) {
+    public void addNewOnClick(View view) {
 
         try {
             Dao<SimpleRecord, Long> simpleRecordDao = getDatabaseHelper().getDao();
@@ -42,18 +43,26 @@ public class MainActivity extends AppCompatActivity {
         UpdateListView();
     }
 
-    public void readFromDatabaseOnClick(View view) {
+    public void deleteLastOnClick(View view) {
+        try {
+            Dao<SimpleRecord, Long> simpleRecordDao = getDatabaseHelper().getDao();
+            SimpleRecord lastRecord = simpleRecordDao.queryForFirst(simpleRecordDao.queryBuilder().orderBy("_id", false).prepare());
+            simpleRecordDao.delete(lastRecord);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        UpdateEntryCount();
+        UpdateListView();
     }
 
     void UpdateListView()
     {
         try {
-            List<SimpleRecord> simpleRecords = getDatabaseHelper().getAllSimpleRecords();
-            SimpleRecord[] simpleRecordArray = simpleRecords.toArray(new SimpleRecord[simpleRecords.size()]);
+            Cursor cursor = getDatabaseHelper().getSimpleRecordCursor();
 
             ListView listView = (ListView)findViewById(R.id.listView);
-            SimpleRecordArrayAdapter entryCursorAdapter = new SimpleRecordArrayAdapter(this, R.layout.entry_cell, simpleRecordArray);
-            listView.setAdapter(entryCursorAdapter);
+            SimpleRecordCursorAdapter adapter = new SimpleRecordCursorAdapter(this, cursor);
+            listView.setAdapter(adapter);
         } catch (SQLException e) {
             e.printStackTrace();
         }

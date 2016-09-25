@@ -1,8 +1,10 @@
 package org.uberthought.myapplication;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.j256.ormlite.android.AndroidDatabaseResults;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.support.ConnectionSource;
@@ -14,7 +16,7 @@ import java.util.List;
 class MainDBHelper extends OrmLiteSqliteOpenHelper {
 
         private static final String DATABASE_NAME = "MainDB.db";
-        private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 3;
 
         /**
          * The data access object used to interact with the Sqlite database to do C.R.U.D operations.
@@ -63,5 +65,10 @@ class MainDBHelper extends OrmLiteSqliteOpenHelper {
 
     List<SimpleRecord> getAllSimpleRecords() throws SQLException {
         return getDao().queryForAll();
+    }
+
+    Cursor getSimpleRecordCursor() throws SQLException {
+        AndroidDatabaseResults results = (AndroidDatabaseResults) getDao().iterator().getRawResults();
+        return results.getRawCursor();
     }
 }
