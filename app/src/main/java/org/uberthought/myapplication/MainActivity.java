@@ -2,6 +2,7 @@ package org.uberthought.myapplication;
 
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
@@ -35,10 +36,31 @@ public class MainActivity extends AppCompatActivity {
                     Cursor cursor = getDatabaseHelper().getSimpleRecordCursor();
 
                     cursor.move(i);
-                    Long id = cursor.getLong(cursor.getColumnIndex("_id"));
+                    final Long id = cursor.getLong(cursor.getColumnIndex("_id"));
 
-                    Dao<SimpleRecord, Long> dao = getDatabaseHelper().getDao();
-                    dao.deleteById(id);
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(adapterView.getContext());
+                    alertDialogBuilder
+                            .setMessage("Click Delete to remove record")
+                            .setCancelable(true)
+                            .setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                @Override
+                                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                                    try {
+                                        Dao<SimpleRecord, Long> dao = getDatabaseHelper().getDao();
+                                        dao.deleteById(id);
+                                    } catch (SQLException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+
+                                @Override
+                                public void onNothingSelected(AdapterView<?> adapterView) {
+
+                                }
+                            });
+                    AlertDialog alertDialog = alertDialogBuilder.create();
+                    alertDialog.show();
+
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
