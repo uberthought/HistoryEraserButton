@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">My Application</string>
+    <string name="addButtonTitle">Add</string>
+    <string name="deleteButtonTitle">Delete Last</string>
 </resources>
