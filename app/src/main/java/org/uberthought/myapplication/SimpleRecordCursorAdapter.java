@@ -29,4 +29,18 @@ class SimpleRecordCursorAdapter extends CursorAdapter {
         TextView textView = (TextView) view.findViewById((R.id.textView2));
         textView.setText(date.toString());
     }
+
+    @Override
+    public long getItemId(int position) {
+        int count = getCount();
+        if (position >= count)
+            return 0;
+        Cursor cursor = (Cursor) getItem(position);
+        return cursor.getLong(cursor.getColumnIndex("_id"));
+    }
+
+    @Override
+    public boolean hasStableIds() {
+        return true;
+    }
 }
