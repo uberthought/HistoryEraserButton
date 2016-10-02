@@ -2,11 +2,14 @@ package org.uberthought.myapplication;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.CheckBox;
 import android.widget.Checkable;
 import android.widget.LinearLayout;
 
 public class CheckableLinearLayout extends LinearLayout implements Checkable {
+
+    boolean mChecked;
 
     public CheckableLinearLayout(Context context) {
         super(context);
@@ -22,20 +25,24 @@ public class CheckableLinearLayout extends LinearLayout implements Checkable {
 
     @Override
     public boolean isChecked() {
-        return getCheckBox().isChecked();
+        return mChecked;
     }
 
     @Override
     public void setChecked(boolean checked) {
-        getCheckBox().setChecked(checked);
+        mChecked = checked;
+        CheckBox checkBox = (CheckBox) findViewById(R.id.checkBox);
+        if (checkBox != null) {
+            if (mChecked)
+                checkBox.setVisibility(View.VISIBLE);
+            else
+                checkBox.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override
     public void toggle() {
-        getCheckBox().toggle();
+        setChecked(!mChecked);
     }
 
-    CheckBox getCheckBox() {
-        return (CheckBox) findViewById(R.id.checkBox);
-    }
 }

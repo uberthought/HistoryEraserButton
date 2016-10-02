@@ -15,6 +15,7 @@ import java.sql.SQLException;
 public class SimpleRecordListFragment extends ListFragment {
 
     SimpleRecordCursorAdapter adapter;
+    boolean mIsChecking;
     private MainDBHelper databaseHelper;
 
     @Override
@@ -29,7 +30,7 @@ public class SimpleRecordListFragment extends ListFragment {
             e.printStackTrace();
         }
 
-        getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+        getListView().setChoiceMode(ListView.CHOICE_MODE_NONE);
         getListView().setOnItemLongClickListener(getOnItemLongClickListener());
     }
 
@@ -54,8 +55,12 @@ public class SimpleRecordListFragment extends ListFragment {
 
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                int checkedCount = getListView().getCheckedItemCount();
-                long[] checkedItemIds = getListView().getCheckedItemIds();
+                mIsChecking = !mIsChecking;
+                if (mIsChecking) {
+                    getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+                } else {
+                    getListView().setChoiceMode(ListView.CHOICE_MODE_NONE);
+                }
                 return false;
             }
         };
