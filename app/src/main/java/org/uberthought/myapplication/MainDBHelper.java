@@ -6,23 +6,25 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.j256.ormlite.android.AndroidDatabaseResults;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
+import com.j256.ormlite.dao.CloseableIterator;
 import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.UUID;
 
 class MainDBHelper extends OrmLiteSqliteOpenHelper {
 
     private static final String DATABASE_NAME = "MainDB.db";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 5;
 
     /**
      * The data access object used to interact with the Sqlite database to do C.R.U.D operations.
      */
     private Dao<SimpleRecord, Long> simpleRecordDao;
+    private Dao<TrackedItem, Long> trackedItemDao;
 
     public MainDBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -36,6 +38,7 @@ class MainDBHelper extends OrmLiteSqliteOpenHelper {
              * creates the mainDB database table
              */
             TableUtils.createTable(connectionSource, SimpleRecord.class);
+            TableUtils.createTable(connectionSource, TrackedItem.class);
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -45,37 +48,36 @@ class MainDBHelper extends OrmLiteSqliteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase database, ConnectionSource connectionSource,
                           int oldVersion, int newVersion) {
+        /**
+         * Recreates the database when onUpgrade is called by the framework
+         */
         try {
-            /**
-             * Recreates the database when onUpgrade is called by the framework
-             */
-            TableUtils.dropTable(connectionSource, SimpleRecord.class, false);
-            onCreate(database, connectionSource);
-
+            TableUtils.dropTable(connectionSource, SimpleRecord.class, true);
+            TableUtils.dropTable(connectionSource, TrackedItem.class, true);
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        onCreate(database, connectionSource);
     }
 
-    Dao<SimpleRecord, Long> getDao() throws SQLException {
+    Dao<SimpleRecord, Long> getSimpleRecordDao() throws SQLException {
         if (simpleRecordDao == null) {
             simpleRecordDao = getDao(SimpleRecord.class);
         }
         return simpleRecordDao;
     }
 
-    List<SimpleRecord> getAllSimpleRecords() {
-        try {
-            return getDao().queryForAll();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return new ArrayList<>();
+    Dao<TrackedItem, Long> getTrackedItemDao() throws SQLException {
+        if (trackedItemDao == null) {
+            trackedItemDao = getDao(TrackedItem.class);
         }
+        return trackedItemDao;
     }
 
     long getAllSimpleRecordsCount() {
         try {
-            return getDao().countOf();
+            return getSimpleRecordDao().countOf();
         } catch (SQLException e) {
             e.printStackTrace();
             return 0;
@@ -83,7 +85,15 @@ class MainDBHelper extends OrmLiteSqliteOpenHelper {
     }
 
     Cursor getSimpleRecordCursor() throws SQLException {
-        AndroidDatabaseResults results = (AndroidDatabaseResults) getDao().iterator().getRawResults();
+        AndroidDatabaseResults results = (AndroidDatabaseResults) getSimpleRecordDao().iterator().getRawResults();
+        return results.getRawCursor();
+    }
+
+    Cursor getSimpleRecordCursor(UUID trackedItemUuid) throws SQLException {
+        QueryBuilder<SimpleRecord, Long> queryBuilder = getSimpleRecordDao().queryBuilder();
+        queryBuilder.where().eq("trackedItemUuid", trackedItemUuid.toString());
+        CloseableIterator<SimpleRecord> closeableIterable = getSimpleRecordDao().iterator(queryBuilder.prepare());
+        AndroidDatabaseResults results = (AndroidDatabaseResults) closeableIterable.getRawResults();
         return results.getRawCursor();
     }
 }

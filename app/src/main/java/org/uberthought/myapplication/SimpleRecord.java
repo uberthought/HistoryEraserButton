@@ -6,7 +6,7 @@ import com.j256.ormlite.table.DatabaseTable;
 import java.util.Date;
 
 
-@DatabaseTable(tableName = "mainDB")
+@DatabaseTable(tableName = "simpleRecordDB")
 class SimpleRecord {
 
     @DatabaseField(generatedId = true, columnName = "_id")
@@ -15,14 +15,16 @@ class SimpleRecord {
     private Long dateOffset;
     @DatabaseField
     private String note;
+    @DatabaseField
+    private String trackedItemUuid;
 
     public SimpleRecord() {
-
     }
 
-    SimpleRecord(Date dateCreated, String note) {
+    SimpleRecord(Date dateCreated, String note, String trackedItemUuid) {
         this.dateOffset = dateCreated.getTime();
         this.note = note;
+        this.trackedItemUuid = trackedItemUuid;
     }
 
     public Long getId() {

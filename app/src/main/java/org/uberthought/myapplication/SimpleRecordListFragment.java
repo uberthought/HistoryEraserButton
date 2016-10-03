@@ -81,7 +81,7 @@ public class SimpleRecordListFragment extends ListFragment {
 //                                @Override
 //                                public void onClick(DialogInterface dialogInterface, int i) {
 //                                    try {
-//                                        Dao<SimpleRecord, Long> dao = getDatabaseHelper().getDao();
+//                                        Dao<SimpleRecord, Long> dao = getDatabaseHelper().getSimpleRecordDao();
 //                                        dao.deleteById(id);
 //                                        onDatabaseChange();
 //                                    } catch (SQLException e) {
