@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.j256.ormlite.android.apptools.OpenHelperManager;
@@ -68,15 +69,22 @@ public class SimpleRecordListFragment extends ListFragment {
             if (!adapter.isCheckable()) {
                 getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
                 adapter.setIsCheckable(true);
+                getBottomBar().setVisibility(View.VISIBLE);
                 onDatabaseChange();
             }
         } else {
             if (adapter.isCheckable()) {
                 getListView().setChoiceMode(ListView.CHOICE_MODE_NONE);
                 adapter.setIsCheckable(false);
+                getBottomBar().setVisibility(View.GONE);
                 onDatabaseChange();
             }
         }
+    }
+
+    LinearLayout getBottomBar() {
+        View view = getView();
+        return (LinearLayout) view.findViewById(R.id.bottomBar);
     }
 
 
