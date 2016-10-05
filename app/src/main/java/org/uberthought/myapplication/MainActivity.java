@@ -11,6 +11,7 @@ import com.j256.ormlite.dao.Dao;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Locale;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,11 +33,11 @@ public class MainActivity extends AppCompatActivity {
     public void addNewOnClick(View view) {
 
         try {
-            Dao<SimpleRecord, Long> simpleRecordDao = getDatabaseHelper().getDao();
+            Dao<SimpleRecord, Long> simpleRecordDao = getDatabaseHelper().getSimpleRecordDao();
 
             Date currDateTime = new Date(System.currentTimeMillis());
 
-            simpleRecordDao.create(new SimpleRecord(currDateTime, "Note 1"));
+            simpleRecordDao.create(new SimpleRecord(currDateTime, "Note 1", UUID.randomUUID().toString()));
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -46,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void deleteLastOnClick(View view) {
         try {
-            Dao<SimpleRecord, Long> simpleRecordDao = getDatabaseHelper().getDao();
+            Dao<SimpleRecord, Long> simpleRecordDao = getDatabaseHelper().getSimpleRecordDao();
             SimpleRecord lastRecord = simpleRecordDao.queryForFirst(simpleRecordDao.queryBuilder().orderBy("_id", false).prepare());
             simpleRecordDao.delete(lastRecord);
         } catch (SQLException e) {

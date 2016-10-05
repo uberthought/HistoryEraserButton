@@ -9,7 +9,7 @@ import android.widget.LinearLayout;
 
 public class CheckableLinearLayout extends LinearLayout implements Checkable {
 
-    boolean mChecked;
+    boolean mIsCheckable;
 
     public CheckableLinearLayout(Context context) {
         super(context);
@@ -45,4 +45,23 @@ public class CheckableLinearLayout extends LinearLayout implements Checkable {
         setChecked(!mChecked);
     }
 
+<<<<<<< HEAD
+    CheckBox getCheckBox() {
+        return (CheckBox) findViewById(R.id.checkBox);
+    }
+
+    public boolean isCheckable() {
+        return mIsCheckable;
+    }
+
+    public void setCheckable(boolean checkable) {
+        this.mIsCheckable = checkable;
+        if (checkable)
+            getCheckBox().setVisibility(View.VISIBLE);
+        else
+            getCheckBox().setVisibility(View.INVISIBLE);
+    }
+
+=======
+>>>>>>> master
 }

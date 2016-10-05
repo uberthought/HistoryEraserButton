@@ -12,6 +12,8 @@ import java.util.Date;
 
 class SimpleRecordCursorAdapter extends CursorAdapter {
 
+    private boolean mIsCheckable;
+
     SimpleRecordCursorAdapter(Context context, Cursor c) {
         super(context, c, 0);
     }
@@ -28,6 +30,9 @@ class SimpleRecordCursorAdapter extends CursorAdapter {
 
         TextView textView = (TextView) view.findViewById((R.id.textView2));
         textView.setText(date.toString());
+
+        CheckableLinearLayout checkableLinearLayout = (CheckableLinearLayout) view;
+        checkableLinearLayout.setCheckable(isCheckable());
     }
 
     @Override
@@ -42,5 +47,13 @@ class SimpleRecordCursorAdapter extends CursorAdapter {
     @Override
     public boolean hasStableIds() {
         return true;
+    }
+
+    boolean isCheckable() {
+        return mIsCheckable;
+    }
+
+    void setIsCheckable(boolean isCheckable) {
+        this.mIsCheckable = isCheckable;
     }
 }

@@ -3,9 +3,9 @@ package org.uberthought.myapplication;
 import android.app.ListFragment;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.j256.ormlite.android.apptools.OpenHelperManager;
@@ -31,7 +31,23 @@ public class SimpleRecordListFragment extends ListFragment {
         }
 
         getListView().setChoiceMode(ListView.CHOICE_MODE_NONE);
-        getListView().setOnItemLongClickListener(getOnItemLongClickListener());
+        getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                int checkedCount = getListView().getCheckedItemCount();
+                if (checkedCount == 0)
+                    setIsCheckable(false);
+            }
+        });
+
+        getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view1, int position, long id) {
+                setIsCheckable(true);
+                return false;
+            }
+        });
     }
 
     public void onDatabaseChange() {
@@ -49,21 +65,32 @@ public class SimpleRecordListFragment extends ListFragment {
         return databaseHelper;
     }
 
-    @NonNull
-    private AdapterView.OnItemLongClickListener getOnItemLongClickListener() {
-        return new AdapterView.OnItemLongClickListener() {
-
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                mIsChecking = !mIsChecking;
-                if (mIsChecking) {
-                    getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-                } else {
-                    getListView().setChoiceMode(ListView.CHOICE_MODE_NONE);
-                }
-                return false;
+    private void setIsCheckable(boolean checkable) {
+        if (checkable) {
+            if (!adapter.isCheckable()) {
+                getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+                adapter.setIsCheckable(true);
+                getBottomBar().setVisibility(View.VISIBLE);
+                onDatabaseChange();
             }
-        };
+        } else {
+            if (adapter.isCheckable()) {
+                getListView().setChoiceMode(ListView.CHOICE_MODE_NONE);
+                adapter.setIsCheckable(false);
+                getBottomBar().setVisibility(View.GONE);
+                onDatabaseChange();
+            }
+        }
+    }
+
+    LinearLayout getBottomBar() {
+        View view = getView();
+        return (LinearLayout) view.findViewById(R.id.bottomBar);
+    }
+
+
+    //                int checkedCount = getListView().getCheckedItemCount();
+//                long[] checkedItemIds = getListView().getCheckedItemIds();
 //        return new AdapterView.OnItemClickListener() {
 //            @Override
 //            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -86,7 +113,7 @@ public class SimpleRecordListFragment extends ListFragment {
 //                                @Override
 //                                public void onClick(DialogInterface dialogInterface, int i) {
 //                                    try {
-//                                        Dao<SimpleRecord, Long> dao = getDatabaseHelper().getDao();
+//                                        Dao<SimpleRecord, Long> dao = getDatabaseHelper().getSimpleRecordDao();
 //                                        dao.deleteById(id);
 //                                        onDatabaseChange();
 //                                    } catch (SQLException e) {
@@ -103,5 +130,6 @@ public class SimpleRecordListFragment extends ListFragment {
 
 //            }
 //        };
-    }
+
+
 }
