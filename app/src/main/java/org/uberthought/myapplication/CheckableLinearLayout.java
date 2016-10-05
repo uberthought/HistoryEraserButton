@@ -25,19 +25,27 @@ public class CheckableLinearLayout extends LinearLayout implements Checkable {
 
     @Override
     public boolean isChecked() {
-        return getCheckBox().isChecked();
+        return mChecked;
     }
 
     @Override
     public void setChecked(boolean checked) {
-        getCheckBox().setChecked(checked);
+        mChecked = checked;
+        CheckBox checkBox = (CheckBox) findViewById(R.id.checkBox);
+        if (checkBox != null) {
+            if (mChecked)
+                checkBox.setVisibility(View.VISIBLE);
+            else
+                checkBox.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override
     public void toggle() {
-        getCheckBox().toggle();
+        setChecked(!mChecked);
     }
 
+<<<<<<< HEAD
     CheckBox getCheckBox() {
         return (CheckBox) findViewById(R.id.checkBox);
     }
@@ -54,4 +62,6 @@ public class CheckableLinearLayout extends LinearLayout implements Checkable {
             getCheckBox().setVisibility(View.INVISIBLE);
     }
 
+=======
+>>>>>>> master
 }

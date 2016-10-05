@@ -15,6 +15,7 @@ import java.sql.SQLException;
 public class SimpleRecordListFragment extends ListFragment {
 
     SimpleRecordCursorAdapter adapter;
+    boolean mIsChecking;
     private MainDBHelper databaseHelper;
 
     @Override
