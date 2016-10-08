@@ -2,4 +2,6 @@
     <string name="app_name">My Application</string>
     <string name="addButtonTitle">Add</string>
     <string name="deleteButtonTitle">Delete Last</string>
+    <string name="delete">Delete</string>
+    <string name="clear">Clear</string>
 </resources>
