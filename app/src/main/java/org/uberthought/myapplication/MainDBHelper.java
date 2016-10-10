@@ -61,6 +61,7 @@ class MainDBHelper extends OrmLiteSqliteOpenHelper {
         onCreate(database, connectionSource);
     }
 
+
     Dao<SimpleRecord, Long> getSimpleRecordDao() throws SQLException {
         if (simpleRecordDao == null) {
             simpleRecordDao = getDao(SimpleRecord.class);
@@ -84,8 +85,22 @@ class MainDBHelper extends OrmLiteSqliteOpenHelper {
         }
     }
 
+    long getTrackedItemCount() {
+        try {
+            return getTrackedItemDao().countOf();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
     Cursor getSimpleRecordCursor() throws SQLException {
         AndroidDatabaseResults results = (AndroidDatabaseResults) getSimpleRecordDao().iterator().getRawResults();
+        return results.getRawCursor();
+    }
+
+    Cursor getTrackedItemCursor() throws SQLException {
+        AndroidDatabaseResults results = (AndroidDatabaseResults) getTrackedItemDao().iterator().getRawResults();
         return results.getRawCursor();
     }
 

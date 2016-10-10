@@ -7,29 +7,26 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.Date;
+class TrackedItemCursorAdapter extends BaseCursorAdapter {
 
-class SimpleRecordCursorAdapter extends BaseCursorAdapter {
-
-    SimpleRecordCursorAdapter(Context context, Cursor c) {
+    TrackedItemCursorAdapter(Context context, Cursor c) {
         super(context, c, 0);
     }
 
     @Override
-    public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
-        return LayoutInflater.from(context).inflate(R.layout.entry_cell, viewGroup, false);
+    public View newView(Context context, Cursor cursor, ViewGroup parent) {
+        return LayoutInflater.from(context).inflate(R.layout.trackeditem_cell, parent, false);
     }
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        Long dateOffset = cursor.getLong(cursor.getColumnIndex("dateOffset"));
-        Date date = new Date(dateOffset);
+
+        String name = cursor.getString(cursor.getColumnIndex("name"));
 
         TextView textView = (TextView) view.findViewById((R.id.textView2));
-        textView.setText(date.toString());
+        textView.setText(name);
 
         CheckableLinearLayout checkableLinearLayout = (CheckableLinearLayout) view;
         checkableLinearLayout.setCheckable(isCheckable());
     }
-
 }

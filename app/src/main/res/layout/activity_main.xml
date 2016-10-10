@@ -39,12 +39,11 @@
         android:text="New Text"
         android:textAlignment="center" />
 
-    <fragment
-        android:id="@+id/simplerecordlist_fragment"
-        android:name="org.uberthought.myapplication.SimpleRecordListFragment"
+    <LinearLayout
+        android:id="@+id/FragmentView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0px"
         android:layout_weight="1"
-        tools:layout="@layout/simplerecordlist_view" />
+        android:orientation="vertical" />
 
 </LinearLayout>
