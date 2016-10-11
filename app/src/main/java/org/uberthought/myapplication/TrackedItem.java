@@ -1,8 +1,11 @@
 package org.uberthought.myapplication;
 
 import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.UUID;
 
 @DatabaseTable(tableName = "trackedItemDB")
@@ -13,6 +16,9 @@ class TrackedItem {
     private String name;
     @DatabaseField
     private String uuid;
+
+    @ForeignCollectionField
+    private Collection<SimpleRecord> simpleRecords = new ArrayList<SimpleRecord>();
 
     TrackedItem() {
     }
@@ -27,7 +33,16 @@ class TrackedItem {
         return name;
     }
 
-    UUID getUuid() {
+    UUID getUuidObject() {
         return UUID.fromString(uuid);
     }
+
+    String getUuid() {
+        return uuid;
+    }
+
+    public Collection<SimpleRecord> getSimpleRecords() {
+        return simpleRecords;
+    }
+
 }

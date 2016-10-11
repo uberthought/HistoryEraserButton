@@ -18,7 +18,7 @@ import java.util.UUID;
 class MainDBHelper extends OrmLiteSqliteOpenHelper {
 
     private static final String DATABASE_NAME = "MainDB.db";
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 6;
 
     /**
      * The data access object used to interact with the Sqlite database to do C.R.U.D operations.
@@ -96,6 +96,17 @@ class MainDBHelper extends OrmLiteSqliteOpenHelper {
 
     Cursor getSimpleRecordCursor() throws SQLException {
         AndroidDatabaseResults results = (AndroidDatabaseResults) getSimpleRecordDao().iterator().getRawResults();
+        return results.getRawCursor();
+    }
+
+    Cursor getSimpleRecordCursor(long trackedItemId) throws SQLException {
+        TrackedItem trackedItem = getTrackedItemDao().queryForId(trackedItemId);
+        AndroidDatabaseResults results = (AndroidDatabaseResults) getSimpleRecordDao()
+                .queryBuilder()
+                .where()
+                .eq("trackedItem_id", trackedItemId)
+                .iterator()
+                .getRawResults();
         return results.getRawCursor();
     }
 

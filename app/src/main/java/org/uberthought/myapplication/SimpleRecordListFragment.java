@@ -5,10 +5,16 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+
+import com.j256.ormlite.dao.Dao;
 
 import java.sql.SQLException;
+import java.util.Date;
 
 public class SimpleRecordListFragment extends BaseListFragment {
+
+    long mTrackedItemId;
 
     public static SimpleRecordListFragment newInstance() {
         return new SimpleRecordListFragment();
@@ -25,16 +31,41 @@ public class SimpleRecordListFragment extends BaseListFragment {
 
         adapter = new SimpleRecordCursorAdapter(getContext(), createCursor());
         setListAdapter(adapter);
+
+        Button addButton = (Button) getView().findViewById(R.id.Add);
+        addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    Dao<TrackedItem, Long> trackedItemDao = getDatabaseHelper().getTrackedItemDao();
+
+                    TrackedItem trackedItem = trackedItemDao.queryForId(mTrackedItemId);
+
+                    Date currDateTime = new Date(System.currentTimeMillis());
+
+                    SimpleRecord simpleRecord = new SimpleRecord(currDateTime, "Note 1", trackedItem.getUuid());
+                    trackedItem.getSimpleRecords().add(simpleRecord);
+
+                    onDatabaseChange();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     @Override
     Cursor createCursor() {
         try {
-            return getDatabaseHelper().getSimpleRecordCursor();
+            return getDatabaseHelper().getSimpleRecordCursor(mTrackedItemId);
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public void Bind(Long id) {
+        mTrackedItemId = id;
     }
 
     //                int checkedCount = getListView().getCheckedItemCount();

@@ -17,6 +17,8 @@ class SimpleRecord {
     private String note;
     @DatabaseField
     private String trackedItemUuid;
+    @DatabaseField(foreign = true, foreignAutoRefresh = true)
+    private TrackedItem trackedItem = new TrackedItem();
 
     public SimpleRecord() {
     }
