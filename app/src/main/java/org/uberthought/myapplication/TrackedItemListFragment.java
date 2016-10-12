@@ -6,7 +6,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
+
+import com.j256.ormlite.dao.Dao;
 
 import java.sql.SQLException;
 
@@ -40,6 +43,22 @@ public class TrackedItemListFragment extends BaseListFragment {
                 }
             }
         });
+
+        Button addButton = (Button) getView().findViewById(R.id.Add);
+        addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    Dao<TrackedItem, Long> trackedItemDao = getDatabaseHelper().getTrackedItemDao();
+
+                    trackedItemDao.create(new TrackedItem("New Item"));
+
+                    onDatabaseChange();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     @Override
@@ -56,8 +75,13 @@ public class TrackedItemListFragment extends BaseListFragment {
         this.listener = listener;
     }
 
+    public void addNewOnClick(View view) {
+
+    }
+
     public interface RowListener {
         void onRowPressed(Long id);
     }
+
 
 }
