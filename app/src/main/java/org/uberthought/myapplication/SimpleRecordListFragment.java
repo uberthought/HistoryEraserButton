@@ -32,7 +32,8 @@ public class SimpleRecordListFragment extends BaseListFragment {
         adapter = new SimpleRecordCursorAdapter(getContext(), createCursor());
         setListAdapter(adapter);
 
-        Button addButton = (Button) getView().findViewById(R.id.Add);
+        Button addButton = (Button) getView().findViewById(R.id.addButton);
+        assert addButton != null;
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

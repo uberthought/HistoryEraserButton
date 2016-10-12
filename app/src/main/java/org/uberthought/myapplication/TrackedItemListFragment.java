@@ -44,7 +44,8 @@ public class TrackedItemListFragment extends BaseListFragment {
             }
         });
 
-        Button addButton = (Button) getView().findViewById(R.id.Add);
+        Button addButton = (Button) getView().findViewById(R.id.addButton);
+        assert addButton != null;
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -73,10 +74,6 @@ public class TrackedItemListFragment extends BaseListFragment {
 
     public void setRowListener(RowListener listener) {
         this.listener = listener;
-    }
-
-    public void addNewOnClick(View view) {
-
     }
 
     public interface RowListener {

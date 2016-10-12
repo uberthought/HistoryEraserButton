@@ -1,7 +1,6 @@
 package org.uberthought.myapplication;
 
 import android.database.Cursor;
-import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -43,33 +42,24 @@ public class MainActivity extends AppCompatActivity {
                         .replace(R.id.FragmentView, simpleRecordListFragment)
                         .addToBackStack(null)
                         .commit();
-
-//                Toast.makeText(getBaseContext(), "Pressed " + id.toString(), Toast.LENGTH_SHORT).show();
             }
         });
 
         try {
             Cursor cursor = getDatabaseHelper().getTrackedItemCursor();
             cursorAdapter = new TrackedItemCursorAdapter(this, cursor);
-
-            cursor.registerDataSetObserver(new DataSetObserver() {
-                @Override
-                public void onChanged() {
-                    super.onChanged();
-                }
-            });
-
-            cursorAdapter.registerDataSetObserver(new DataSetObserver() {
-                @Override
-                public void onChanged() {
-                    super.onChanged();
-
-                    onDatabaseChange();
-                }
-            });
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        getDatabaseHelper().addDBListener(new MainDBHelper.DBChangedListener() {
+            @Override
+            public void dbChanged() {
+                onDatabaseChange();
+            }
+        });
+
+        onDatabaseChange();
     }
 
 

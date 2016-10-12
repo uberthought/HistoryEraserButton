@@ -6,20 +6,18 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.j256.ormlite.android.AndroidDatabaseResults;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
-import com.j256.ormlite.dao.CloseableIterator;
 import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 
 import java.sql.SQLException;
-import java.util.UUID;
+import java.util.Vector;
 
 class MainDBHelper extends OrmLiteSqliteOpenHelper {
 
     private static final String DATABASE_NAME = "MainDB.db";
     private static final int DATABASE_VERSION = 6;
-
+    private static Vector<DBChangedListener> mDBChangedListeners = new Vector<>();
     /**
      * The data access object used to interact with the Sqlite database to do C.R.U.D operations.
      */
@@ -28,6 +26,20 @@ class MainDBHelper extends OrmLiteSqliteOpenHelper {
 
     public MainDBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    }
+
+    void addDBListener(DBChangedListener listener) {
+        mDBChangedListeners.add(listener);
+    }
+
+    void removeDBListener(DBChangedListener listener) {
+        mDBChangedListeners.remove(listener);
+    }
+
+    void OnDBChanged() {
+        for (DBChangedListener listener : mDBChangedListeners) {
+            listener.dbChanged();
+        }
     }
 
     @Override
@@ -61,7 +73,6 @@ class MainDBHelper extends OrmLiteSqliteOpenHelper {
         onCreate(database, connectionSource);
     }
 
-
     Dao<SimpleRecord, Long> getSimpleRecordDao() throws SQLException {
         if (simpleRecordDao == null) {
             simpleRecordDao = getDao(SimpleRecord.class);
@@ -76,15 +87,6 @@ class MainDBHelper extends OrmLiteSqliteOpenHelper {
         return trackedItemDao;
     }
 
-    long getAllSimpleRecordsCount() {
-        try {
-            return getSimpleRecordDao().countOf();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return 0;
-        }
-    }
-
     long getTrackedItemCount() {
         try {
             return getTrackedItemDao().countOf();
@@ -94,13 +96,7 @@ class MainDBHelper extends OrmLiteSqliteOpenHelper {
         }
     }
 
-    Cursor getSimpleRecordCursor() throws SQLException {
-        AndroidDatabaseResults results = (AndroidDatabaseResults) getSimpleRecordDao().iterator().getRawResults();
-        return results.getRawCursor();
-    }
-
     Cursor getSimpleRecordCursor(long trackedItemId) throws SQLException {
-        TrackedItem trackedItem = getTrackedItemDao().queryForId(trackedItemId);
         AndroidDatabaseResults results = (AndroidDatabaseResults) getSimpleRecordDao()
                 .queryBuilder()
                 .where()
@@ -115,11 +111,8 @@ class MainDBHelper extends OrmLiteSqliteOpenHelper {
         return results.getRawCursor();
     }
 
-    Cursor getSimpleRecordCursor(UUID trackedItemUuid) throws SQLException {
-        QueryBuilder<SimpleRecord, Long> queryBuilder = getSimpleRecordDao().queryBuilder();
-        queryBuilder.where().eq("trackedItemUuid", trackedItemUuid.toString());
-        CloseableIterator<SimpleRecord> closeableIterable = getSimpleRecordDao().iterator(queryBuilder.prepare());
-        AndroidDatabaseResults results = (AndroidDatabaseResults) closeableIterable.getRawResults();
-        return results.getRawCursor();
+    interface DBChangedListener {
+        void dbChanged();
     }
+
 }

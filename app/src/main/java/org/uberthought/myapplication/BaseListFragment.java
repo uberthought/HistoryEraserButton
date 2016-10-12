@@ -119,6 +119,7 @@ public abstract class BaseListFragment extends ListFragment {
 
     void onDatabaseChange() {
         adapter.swapCursor(createCursor());
+        getDatabaseHelper().OnDBChanged();
     }
 
     private void setIsCheckable(boolean checkable) {
