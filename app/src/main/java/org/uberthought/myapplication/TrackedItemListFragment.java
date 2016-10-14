@@ -1,12 +1,14 @@
 package org.uberthought.myapplication;
 
+import android.app.AlertDialog;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 
 import java.sql.SQLException;
@@ -32,28 +34,36 @@ public class TrackedItemListFragment extends BaseListFragment {
         setListAdapter(adapter);
 
         getListView().setChoiceMode(ListView.CHOICE_MODE_NONE);
-        getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                if (!adapter.isCheckable()) {
-                    if (listener != null)
-                        listener.onRowPressed(l);
-                }
+        getListView().setOnItemClickListener((adapterView, v, i, l) -> {
+            if (!adapter.isCheckable()) {
+                if (listener != null)
+                    listener.onRowPressed(l);
             }
         });
 
-        Button addButton = (Button) getView().findViewById(R.id.addButton);
+        View view1 = getView();
+        assert view1 != null;
+        Button addButton = (Button) view1.findViewById(R.id.addButton);
         assert addButton != null;
-        addButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        addButton.setOnClickListener((v) -> {
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            final EditText input = new EditText(getContext());
+            input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
+            builder.setView(input);
+
+            builder.setPositiveButton("OK", (dialog, which) -> {
 
                 TrackedItem trackedItem = getDatabaseHelper().create(TrackedItem.class);
-                trackedItem.setName("Test Item " + trackedItem.getId());
+                trackedItem.setName(input.getText().toString());
                 getDatabaseHelper().update(trackedItem);
 
                 onDatabaseChange();
-            }
+            });
+
+            builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+
+            builder.show();
         });
     }
 

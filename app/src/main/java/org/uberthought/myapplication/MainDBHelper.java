@@ -16,7 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
-class MainDBHelper extends OrmLiteSqliteOpenHelper {
+@SuppressWarnings("all")
+public class MainDBHelper extends OrmLiteSqliteOpenHelper {
 
     private static final String DATABASE_NAME = "MainDB.db";
     private static final int DATABASE_VERSION = 6;
@@ -73,6 +74,7 @@ class MainDBHelper extends OrmLiteSqliteOpenHelper {
         onCreate(database, connectionSource);
     }
 
+    @SuppressWarnings("unchecked")
     public <D extends Dao<T, ?>, T> D getDao(Class<T> clazz) throws SQLException {
         D castDao;
         Dao<T, ?> dao = null;
@@ -81,6 +83,7 @@ class MainDBHelper extends OrmLiteSqliteOpenHelper {
             if (cachedDao.getClass() == clazz)
                 dao = (Dao<T, ?>) cachedDao;
         }
+
         // special reflection fu is now handled internally by create dao calling the database type
         if (dao == null)
             dao = DaoManager.createDao(getConnectionSource(), clazz);
@@ -93,9 +96,7 @@ class MainDBHelper extends OrmLiteSqliteOpenHelper {
         T result = null;
         try {
             result = clazz.newInstance();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
+        } catch (InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
         }
 
@@ -139,6 +140,7 @@ class MainDBHelper extends OrmLiteSqliteOpenHelper {
         }
     }
 
+    @SuppressWarnings("unchecked")
     <T> void update(T data) {
         try {
             Dao<T, ?> dao = getDao((Class<T>) data.getClass());
