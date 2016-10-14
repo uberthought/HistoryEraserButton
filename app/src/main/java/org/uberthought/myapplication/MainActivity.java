@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         try {
-            Cursor cursor = getDatabaseHelper().getTrackedItemCursor();
+            Cursor cursor = getDatabaseHelper().getCursor(TrackedItem.class);
             cursorAdapter = new TrackedItemCursorAdapter(this, cursor);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void deleteLastOnClick(View view) {
         try {
-            Dao<SimpleRecord, Long> simpleRecordDao = getDatabaseHelper().getSimpleRecordDao();
+            Dao<SimpleRecord, Long> simpleRecordDao = getDatabaseHelper().getDao(SimpleRecord.class);
             SimpleRecord lastRecord = simpleRecordDao.queryForFirst(simpleRecordDao.queryBuilder().orderBy("_id", false).prepare());
             simpleRecordDao.delete(lastRecord);
         } catch (SQLException e) {
@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void onDatabaseChange() {
         TextView textView = (TextView) findViewById(R.id.textView);
-        textView.setText(String.format(Locale.US, "%d", getDatabaseHelper().getTrackedItemCount()));
+        textView.setText(String.format(Locale.US, "%d", getDatabaseHelper().getCount(TrackedItem.class)));
     }
 
     MainDBHelper getDatabaseHelper() {

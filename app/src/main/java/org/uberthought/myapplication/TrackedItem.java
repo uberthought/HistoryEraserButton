@@ -6,43 +6,35 @@ import com.j256.ormlite.table.DatabaseTable;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.UUID;
 
 @DatabaseTable(tableName = "trackedItemDB")
 class TrackedItem {
     @DatabaseField(generatedId = true, columnName = "_id")
     private Long id;
+
     @DatabaseField
     private String name;
-    @DatabaseField
-    private String uuid;
 
     @ForeignCollectionField
-    private Collection<SimpleRecord> simpleRecords = new ArrayList<SimpleRecord>();
+    private Collection<SimpleRecord> simpleRecords = new ArrayList<>();
 
     TrackedItem() {
     }
 
 
-    TrackedItem(String name) {
-        this.name = name;
-        this.uuid = UUID.randomUUID().toString();
-    }
-
     String getName() {
         return name;
     }
 
-    UUID getUuidObject() {
-        return UUID.fromString(uuid);
+    public void setName(String name) {
+        this.name = name;
     }
 
-    String getUuid() {
-        return uuid;
-    }
-
-    public Collection<SimpleRecord> getSimpleRecords() {
+    Collection<SimpleRecord> getSimpleRecords() {
         return simpleRecords;
     }
 
+    public Long getId() {
+        return id;
+    }
 }

@@ -38,14 +38,19 @@ public class SimpleRecordListFragment extends BaseListFragment {
             @Override
             public void onClick(View view) {
                 try {
-                    Dao<TrackedItem, Long> trackedItemDao = getDatabaseHelper().getTrackedItemDao();
-
+                    Dao<TrackedItem, Long> trackedItemDao = getDatabaseHelper().getDao(TrackedItem.class);
                     TrackedItem trackedItem = trackedItemDao.queryForId(mTrackedItemId);
 
                     Date currDateTime = new Date(System.currentTimeMillis());
 
-                    SimpleRecord simpleRecord = new SimpleRecord(currDateTime, "Note 1", trackedItem.getUuid());
+                    // create the new record
+                    SimpleRecord simpleRecord = getDatabaseHelper().create(SimpleRecord.class);
+                    simpleRecord.setDate(currDateTime);
+                    getDatabaseHelper().update(simpleRecord);
+
+                    // add the record to the tracked item
                     trackedItem.getSimpleRecords().add(simpleRecord);
+                    getDatabaseHelper().update(trackedItem);
 
                     onDatabaseChange();
                 } catch (SQLException e) {
@@ -65,51 +70,13 @@ public class SimpleRecordListFragment extends BaseListFragment {
         return null;
     }
 
+    @Override
+    void deleteItems(long[] itemIds) {
+        getDatabaseHelper().deleteItems(SimpleRecord.class, itemIds);
+    }
+
     public void Bind(Long id) {
         mTrackedItemId = id;
     }
-
-    //                int checkedCount = getListView().getCheckedItemCount();
-//                long[] checkedItemIds = getListView().getCheckedItemIds();
-//        return new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-//                listView.setItemChecked(i, true);
-//                CheckableLinearLayout checkableLinearLayout = (CheckableLinearLayout)view;
-//                checkableLinearLayout.setChecked(true);
-//                int checkedCount = listView.getCheckedItemCount();
-//                long[] checkedItemIds = listView.getCheckedItemIds();
-//                try {
-//                    Cursor cursor = getDatabaseHelper().getSimpleRecordCursor();
-//
-//                    cursor.move(i);
-//                    final Long id = cursor.getLong(cursor.getColumnIndex("_id"));
-//
-//                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(adapterView.getContext());
-//                    alertDialogBuilder
-//                            .setMessage("Are you sure you want to delete this record")
-//                            .setCancelable(true)
-//                            .setNegativeButton("Delete", new DialogInterface.OnClickListener() {
-//                                @Override
-//                                public void onClick(DialogInterface dialogInterface, int i) {
-//                                    try {
-//                                        Dao<SimpleRecord, Long> dao = getDatabaseHelper().getSimpleRecordDao();
-//                                        dao.deleteById(id);
-//                                        onDatabaseChange();
-//                                    } catch (SQLException e) {
-//                                        e.printStackTrace();
-//                                    }
-//                                }
-//                            });
-//                    AlertDialog alertDialog = alertDialogBuilder.create();
-//                    alertDialog.show();
-//
-//                } catch (SQLException e) {
-//                    e.printStackTrace();
-//                }
-
-//            }
-//        };
-
 
 }

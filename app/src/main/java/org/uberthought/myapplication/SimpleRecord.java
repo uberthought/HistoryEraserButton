@@ -15,18 +15,10 @@ class SimpleRecord {
     private Long dateOffset;
     @DatabaseField
     private String note;
-    @DatabaseField
-    private String trackedItemUuid;
     @DatabaseField(foreign = true, foreignAutoRefresh = true)
     private TrackedItem trackedItem = new TrackedItem();
 
     public SimpleRecord() {
-    }
-
-    SimpleRecord(Date dateCreated, String note, String trackedItemUuid) {
-        this.dateOffset = dateCreated.getTime();
-        this.note = note;
-        this.trackedItemUuid = trackedItemUuid;
     }
 
     public Long getId() {
@@ -43,5 +35,9 @@ class SimpleRecord {
 
     Date getDate() {
         return new Date(dateOffset);
+    }
+
+    void setDate(Date date) {
+        dateOffset = date.getTime();
     }
 }

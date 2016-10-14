@@ -12,11 +12,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.j256.ormlite.android.apptools.OpenHelperManager;
-import com.j256.ormlite.dao.Dao;
-
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class BaseListFragment extends ListFragment {
 
@@ -58,27 +53,16 @@ public abstract class BaseListFragment extends ListFragment {
                         .setNegativeButton("Delete", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                try {
+                                // build a list of items to delete
+                                long[] checkedItems = getListView().getCheckedItemIds();
 
-                                    // build a list of items to delete
-                                    long[] checkedItems = getListView().getCheckedItemIds();
-                                    List<Long> checkedItemList = new ArrayList<>();
-                                    for (long checkedItem : checkedItems)
-                                        checkedItemList.add(checkedItem);
+                                deleteItems(checkedItems);
 
-                                    // delete them from the database
-                                    Dao<SimpleRecord, Long> dao = getDatabaseHelper().getSimpleRecordDao();
-                                    dao.deleteIds(checkedItemList);
+                                // clear the checkboxes
+                                setIsCheckable(false);
 
-                                    // clear the checkboxes
-                                    setIsCheckable(false);
-
-                                    // refresh
-                                    onDatabaseChange();
-
-                                } catch (SQLException e) {
-                                    e.printStackTrace();
-                                }
+                                // refresh
+                                onDatabaseChange();
                             }
                         });
                 AlertDialog alertDialog = alertDialogBuilder.create();
@@ -116,6 +100,8 @@ public abstract class BaseListFragment extends ListFragment {
     }
 
     abstract Cursor createCursor();
+
+    abstract void deleteItems(long[] itemIds);
 
     void onDatabaseChange() {
         adapter.swapCursor(createCursor());

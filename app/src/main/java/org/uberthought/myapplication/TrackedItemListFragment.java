@@ -9,8 +9,6 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 
-import com.j256.ormlite.dao.Dao;
-
 import java.sql.SQLException;
 
 public class TrackedItemListFragment extends BaseListFragment {
@@ -49,15 +47,12 @@ public class TrackedItemListFragment extends BaseListFragment {
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                try {
-                    Dao<TrackedItem, Long> trackedItemDao = getDatabaseHelper().getTrackedItemDao();
 
-                    trackedItemDao.create(new TrackedItem("New Item"));
+                TrackedItem trackedItem = getDatabaseHelper().create(TrackedItem.class);
+                trackedItem.setName("Test Item " + trackedItem.getId());
+                getDatabaseHelper().update(trackedItem);
 
-                    onDatabaseChange();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+                onDatabaseChange();
             }
         });
     }
@@ -65,11 +60,16 @@ public class TrackedItemListFragment extends BaseListFragment {
     @Override
     Cursor createCursor() {
         try {
-            return getDatabaseHelper().getTrackedItemCursor();
+            return getDatabaseHelper().getCursor(TrackedItem.class);
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    void deleteItems(long[] itemIds) {
+        getDatabaseHelper().deleteItems(TrackedItem.class, itemIds);
     }
 
     public void setRowListener(RowListener listener) {
