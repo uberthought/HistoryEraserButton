@@ -15,6 +15,7 @@ class TrackedItem {
     @DatabaseField
     private String name;
 
+    @SuppressWarnings("CanBeFinal")
     @ForeignCollectionField
     private Collection<SimpleRecord> simpleRecords = new ArrayList<>();
 

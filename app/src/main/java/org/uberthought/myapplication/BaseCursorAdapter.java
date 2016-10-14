@@ -7,8 +7,8 @@ import android.widget.CursorAdapter;
 abstract class BaseCursorAdapter extends CursorAdapter {
     private boolean mIsCheckable;
 
-    BaseCursorAdapter(Context context, Cursor c, int flags) {
-        super(context, c, flags);
+    BaseCursorAdapter(Context context, Cursor c) {
+        super(context, c, 0);
     }
 
     @Override

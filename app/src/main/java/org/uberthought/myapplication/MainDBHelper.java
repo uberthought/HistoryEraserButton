@@ -13,17 +13,19 @@ import com.j256.ormlite.table.TableUtils;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
-@SuppressWarnings("all")
+@SuppressWarnings("WeakerAccess")
 public class MainDBHelper extends OrmLiteSqliteOpenHelper {
 
     private static final String DATABASE_NAME = "MainDB.db";
     private static final int DATABASE_VERSION = 6;
-    private static Vector<DBChangedListener> mDBChangedListeners = new Vector<>();
+    private static final Vector<DBChangedListener> mDBChangedListeners = new Vector<>();
 
-    private List<Object> daoList = new ArrayList<>();
+    private final Map<Class, Object> daoMap = new HashMap<>();
 
     public MainDBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -77,16 +79,13 @@ public class MainDBHelper extends OrmLiteSqliteOpenHelper {
     @SuppressWarnings("unchecked")
     public <D extends Dao<T, ?>, T> D getDao(Class<T> clazz) throws SQLException {
         D castDao;
-        Dao<T, ?> dao = null;
-
-        for (Object cachedDao : daoList) {
-            if (cachedDao.getClass() == clazz)
-                dao = (Dao<T, ?>) cachedDao;
-        }
+        Dao<T, ?> dao = (Dao<T, ?>) daoMap.get(clazz);
 
         // special reflection fu is now handled internally by create dao calling the database type
-        if (dao == null)
+        if (dao == null) {
             dao = DaoManager.createDao(getConnectionSource(), clazz);
+            daoMap.put(clazz, dao);
+        }
         castDao = (D) dao;
         return castDao;
     }

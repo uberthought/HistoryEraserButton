@@ -10,7 +10,7 @@ import android.widget.TextView;
 class TrackedItemCursorAdapter extends BaseCursorAdapter {
 
     TrackedItemCursorAdapter(Context context, Cursor c) {
-        super(context, c, 0);
+        super(context, c);
     }
 
     @Override

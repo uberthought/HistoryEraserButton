@@ -12,7 +12,7 @@ import java.util.Date;
 class SimpleRecordCursorAdapter extends BaseCursorAdapter {
 
     SimpleRecordCursorAdapter(Context context, Cursor c) {
-        super(context, c, 0);
+        super(context, c);
     }
 
     @Override

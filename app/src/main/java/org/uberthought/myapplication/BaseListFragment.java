@@ -2,11 +2,9 @@ package org.uberthought.myapplication;
 
 import android.app.AlertDialog;
 import android.app.ListFragment;
-import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -23,72 +21,56 @@ public abstract class BaseListFragment extends ListFragment {
         super.onViewCreated(view, savedInstanceState);
 
         getListView().setChoiceMode(ListView.CHOICE_MODE_NONE);
-        getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                if (adapter.isCheckable()) {
-                    int checkedCount = getListView().getCheckedItemCount();
-                    if (checkedCount == 0)
+        getListView().setOnItemClickListener((adapterView, view12, i, l) -> {
+            if (adapter.isCheckable()) {
+                int checkedCount = getListView().getCheckedItemCount();
+                if (checkedCount == 0)
+                    setIsCheckable(false);
+            }
+        });
+
+        getListView().setOnItemLongClickListener((parent, view1, position, id) -> {
+            setIsCheckable(true);
+            return false;
+        });
+
+        //noinspection ConstantConditions
+        getDeleteButton().setOnClickListener(v -> {
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(v.getContext());
+            alertDialogBuilder
+                    .setMessage("Are you sure you want to delete these record")
+                    .setCancelable(true)
+                    .setNegativeButton("Delete", (dialogInterface, i) -> {
+                        // build a list of items to delete
+                        long[] checkedItems = getListView().getCheckedItemIds();
+
+                        deleteItems(checkedItems);
+
+                        // clear the checkboxes
                         setIsCheckable(false);
-                }
-            }
-        });
 
-        getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                        // refresh
+                        onDatabaseChange();
+                    });
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
 
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view1, int position, long id) {
-                setIsCheckable(true);
-                return false;
-            }
-        });
-
-        getDeleteButton().setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(v.getContext());
-                alertDialogBuilder
-                        .setMessage("Are you sure you want to delete these record")
-                        .setCancelable(true)
-                        .setNegativeButton("Delete", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                // build a list of items to delete
-                                long[] checkedItems = getListView().getCheckedItemIds();
-
-                                deleteItems(checkedItems);
-
-                                // clear the checkboxes
-                                setIsCheckable(false);
-
-                                // refresh
-                                onDatabaseChange();
-                            }
-                        });
-                AlertDialog alertDialog = alertDialogBuilder.create();
-                alertDialog.show();
-
-            }
         });
 
         final Button clearButton = getClearButton();
 
-        clearButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // clear checked items
-                getListView().clearChoices();
-                getListView().requestLayout();
+        //noinspection ConstantConditions
+        clearButton.setOnClickListener(v -> {
+            // clear checked items
+            getListView().clearChoices();
+            getListView().requestLayout();
 
-                // after 1/2 a second, clear the checkboxes
-                clearButton.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        // clear the checkboxes
-                        setIsCheckable(false);
-                    }
-                }, 500);
-            }
+            // after 1/2 a second, clear the checkboxes
+            //noinspection ConstantConditions
+            clearButton.postDelayed(() -> {
+                // clear the checkboxes
+                setIsCheckable(false);
+            }, 500);
         });
 
     }
@@ -113,6 +95,7 @@ public abstract class BaseListFragment extends ListFragment {
             if (!adapter.isCheckable()) {
                 getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
                 adapter.setIsCheckable(true);
+                //noinspection ConstantConditions
                 getBottomBar().setVisibility(View.VISIBLE);
                 onDatabaseChange();
             }
@@ -120,27 +103,28 @@ public abstract class BaseListFragment extends ListFragment {
             if (adapter.isCheckable()) {
                 getListView().setChoiceMode(ListView.CHOICE_MODE_NONE);
                 adapter.setIsCheckable(false);
+                //noinspection ConstantConditions
                 getBottomBar().setVisibility(View.GONE);
                 onDatabaseChange();
             }
         }
     }
 
-    LinearLayout getBottomBar() {
+    private LinearLayout getBottomBar() {
         View view = getView();
         if (view != null)
             return (LinearLayout) view.findViewById(R.id.bottomBar);
         return null;
     }
 
-    Button getDeleteButton() {
+    private Button getDeleteButton() {
         View view = getView();
         if (view != null)
             return (Button) view.findViewById(R.id.deleteButton);
         return null;
     }
 
-    Button getClearButton() {
+    private Button getClearButton() {
         View view = getView();
         if (view != null)
             return (Button) view.findViewById(R.id.clearButton);

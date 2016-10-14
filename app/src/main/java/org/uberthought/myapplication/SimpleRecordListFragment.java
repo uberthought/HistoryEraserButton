@@ -14,7 +14,7 @@ import java.util.Date;
 
 public class SimpleRecordListFragment extends BaseListFragment {
 
-    long mTrackedItemId;
+    private long mTrackedItemId;
 
     public static SimpleRecordListFragment newInstance() {
         return new SimpleRecordListFragment();
@@ -32,30 +32,27 @@ public class SimpleRecordListFragment extends BaseListFragment {
         adapter = new SimpleRecordCursorAdapter(getContext(), createCursor());
         setListAdapter(adapter);
 
-        Button addButton = (Button) getView().findViewById(R.id.addButton);
+        @SuppressWarnings("ConstantConditions") Button addButton = (Button) getView().findViewById(R.id.addButton);
         assert addButton != null;
-        addButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    Dao<TrackedItem, Long> trackedItemDao = getDatabaseHelper().getDao(TrackedItem.class);
-                    TrackedItem trackedItem = trackedItemDao.queryForId(mTrackedItemId);
+        addButton.setOnClickListener(view1 -> {
+            try {
+                Dao<TrackedItem, Long> trackedItemDao = getDatabaseHelper().getDao(TrackedItem.class);
+                TrackedItem trackedItem = trackedItemDao.queryForId(mTrackedItemId);
 
-                    Date currDateTime = new Date(System.currentTimeMillis());
+                Date currDateTime = new Date(System.currentTimeMillis());
 
-                    // create the new record
-                    SimpleRecord simpleRecord = getDatabaseHelper().create(SimpleRecord.class);
-                    simpleRecord.setDate(currDateTime);
-                    getDatabaseHelper().update(simpleRecord);
+                // create the new record
+                SimpleRecord simpleRecord = getDatabaseHelper().create(SimpleRecord.class);
+                simpleRecord.setDate(currDateTime);
+                getDatabaseHelper().update(simpleRecord);
 
-                    // add the record to the tracked item
-                    trackedItem.getSimpleRecords().add(simpleRecord);
-                    getDatabaseHelper().update(trackedItem);
+                // add the record to the tracked item
+                trackedItem.getSimpleRecords().add(simpleRecord);
+                getDatabaseHelper().update(trackedItem);
 
-                    onDatabaseChange();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+                onDatabaseChange();
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         });
     }
