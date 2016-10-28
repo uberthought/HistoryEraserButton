@@ -7,6 +7,12 @@
     android:orientation="vertical"
     tools:context="org.uberthought.myapplication.MainActivity">
 
+    <Button
+        android:text="Speech Input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/speech_input" />
+
     <TextView
         android:id="@+id/textView"
         android:layout_width="match_parent"
