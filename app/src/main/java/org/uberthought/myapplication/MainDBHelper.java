@@ -39,7 +39,7 @@ public class MainDBHelper extends OrmLiteSqliteOpenHelper {
         mDBChangedListeners.remove(listener);
     }
 
-    void OnDBChanged() {
+    void dbChanged() {
         for (DBChangedListener listener : mDBChangedListeners) {
             listener.dbChanged();
         }
@@ -163,6 +163,7 @@ public class MainDBHelper extends OrmLiteSqliteOpenHelper {
         AndroidDatabaseResults results = (AndroidDatabaseResults) getDao(clazz).iterator().getRawResults();
         return results.getRawCursor();
     }
+
 
     interface DBChangedListener {
         void dbChanged();

@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -58,9 +56,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 1234) {
+        if (requestCode == 1234 && resultCode == RESULT_OK) {
             ArrayList<String> matches = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
             Toast.makeText(this, matches.get(0), Toast.LENGTH_LONG).show();
+
+            TrackedItem.createOrIncrement(matches.get(0), getDatabaseHelper());
+            getDatabaseHelper().dbChanged();
         }
     }
 
@@ -74,6 +75,5 @@ public class MainActivity extends AppCompatActivity {
             databaseHelper = OpenHelperManager.getHelper(this, MainDBHelper.class);
         return databaseHelper;
     }
-
 
 }

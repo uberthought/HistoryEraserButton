@@ -50,7 +50,7 @@ public abstract class BaseListFragment extends ListFragment {
                         setIsCheckable(false);
 
                         // refresh
-                        onDatabaseChange();
+                        databaseChanged();
                     });
             AlertDialog alertDialog = alertDialogBuilder.create();
             alertDialog.show();
@@ -85,9 +85,11 @@ public abstract class BaseListFragment extends ListFragment {
 
     abstract void deleteItems(long[] itemIds);
 
+    void databaseChanged() {
+        getDatabaseHelper().dbChanged();
+    }
     void onDatabaseChange() {
         adapter.swapCursor(createCursor());
-        getDatabaseHelper().OnDBChanged();
     }
 
     private void setIsCheckable(boolean checkable) {
@@ -97,7 +99,7 @@ public abstract class BaseListFragment extends ListFragment {
                 adapter.setIsCheckable(true);
                 //noinspection ConstantConditions
                 getBottomBar().setVisibility(View.VISIBLE);
-                onDatabaseChange();
+                databaseChanged();
             }
         } else {
             if (adapter.isCheckable()) {
@@ -105,7 +107,7 @@ public abstract class BaseListFragment extends ListFragment {
                 adapter.setIsCheckable(false);
                 //noinspection ConstantConditions
                 getBottomBar().setVisibility(View.GONE);
-                onDatabaseChange();
+                databaseChanged();
             }
         }
     }

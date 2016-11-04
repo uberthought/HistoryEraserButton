@@ -21,6 +21,21 @@ class SimpleRecord {
     public SimpleRecord() {
     }
 
+    static SimpleRecord create(TrackedItem trackedItem, MainDBHelper databaseHelper) {
+        Date currDateTime = new Date(System.currentTimeMillis());
+
+        // create the new record
+        SimpleRecord simpleRecord = databaseHelper.create(SimpleRecord.class);
+        simpleRecord.setDate(currDateTime);
+        databaseHelper.update(simpleRecord);
+
+        // add the record to the tracked item
+        trackedItem.getSimpleRecords().add(simpleRecord);
+        databaseHelper.update(trackedItem);
+
+        return simpleRecord;
+    }
+
     public Long getId() {
         return id;
     }

@@ -50,11 +50,13 @@ public class SimpleRecordListFragment extends BaseListFragment {
                 trackedItem.getSimpleRecords().add(simpleRecord);
                 getDatabaseHelper().update(trackedItem);
 
-                onDatabaseChange();
+                databaseChanged();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         });
+
+        getDatabaseHelper().addDBListener(this::onDatabaseChange);
     }
 
     @Override

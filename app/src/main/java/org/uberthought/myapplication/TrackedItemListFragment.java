@@ -58,13 +58,15 @@ public class TrackedItemListFragment extends BaseListFragment {
                 trackedItem.setName(input.getText().toString());
                 getDatabaseHelper().update(trackedItem);
 
-                onDatabaseChange();
+                databaseChanged();
             });
 
             builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
             builder.show();
         });
+
+        getDatabaseHelper().addDBListener(this::onDatabaseChange);
     }
 
     @Override
