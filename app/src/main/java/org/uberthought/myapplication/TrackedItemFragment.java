@@ -16,6 +16,10 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.j256.ormlite.android.apptools.OpenHelperManager;
+import com.j256.ormlite.dao.Dao;
+
+import java.sql.SQLException;
+import java.util.List;
 
 public class TrackedItemFragment extends Fragment {
 
@@ -78,11 +82,16 @@ public class TrackedItemFragment extends Fragment {
                     .setMessage("Are you sure you want to delete these record")
                     .setCancelable(true)
                     .setNegativeButton("Delete", (dialogInterface, i) -> {
-                        // build a list of items to delete
+                        try {
+                            // build a list of items to delete
+                            List<Long> checkedIds = mAdapter.getCheckedIds();
 
-                        // delete them
-
-                        // clear the checkboxes
+                            // delete them
+                            Dao<TrackedItem, Long> dao = getDatabaseHelper().getDao(TrackedItem.class);
+                            dao.deleteIds(checkedIds);
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
 
                         // refresh
                         onDatabaseChange();

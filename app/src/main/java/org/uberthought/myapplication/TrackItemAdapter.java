@@ -22,7 +22,7 @@ public class TrackItemAdapter extends RecyclerView.Adapter<TrackItemAdapter.View
     private MainDBHelper mDatabaseHelper;
     private Context mContext;
     private Dao<TrackedItem, Long> mDao;
-    private List<Integer> mCheckedItems = new ArrayList<>();
+    private List<Long> mCheckedIds = new ArrayList<>();
 
     public TrackItemAdapter(Context context) {
         mContext = context;
@@ -42,7 +42,7 @@ public class TrackItemAdapter extends RecyclerView.Adapter<TrackItemAdapter.View
                 .inflate(R.layout.trackeditem_cell, parent, false);
         // set the view's size, margins, paddings and layout parameters
 
-        ViewHolder vh = new ViewHolder(view, this);
+        ViewHolder vh = new ViewHolder(view);
         return vh;
     }
 
@@ -52,59 +52,51 @@ public class TrackItemAdapter extends RecyclerView.Adapter<TrackItemAdapter.View
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
 
-        Integer positionObject = new Integer(position);
-
-        String name = "";
-        int count = 0;
-        boolean checked = false;
         try {
             TrackedItem trackedItem = mDao.queryForAll().get((int) position);
-            name = trackedItem.getName();
-            count = trackedItem.getSimpleRecords().size();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        checked = mCheckedItems.contains(positionObject);
+            String name = trackedItem.getName();
+            int count = trackedItem.getSimpleRecords().size();
+            final Long  id = trackedItem.getId();
+            boolean checked = mCheckedIds.contains(id);
 
-        TextView textView = (TextView) holder.mView.findViewById((R.id.textView2));
-        textView.setText(String.format("%s %d", name, count));
+            TextView textView = (TextView) holder.mView.findViewById((R.id.textView2));
+            textView.setText(String.format("%s %d", name, count));
 
-        CheckBox checkBox = (CheckBox) holder.mView.findViewById(R.id.checkBox);
-        checkBox.setChecked(checked);
+            CheckBox checkBox = (CheckBox) holder.mView.findViewById(R.id.checkBox);
+            checkBox.setChecked(checked);
 
-        holder.mView.setOnLongClickListener(v -> {
-            if (mCheckedItems.contains(positionObject)) {
-                mCheckedItems.remove(positionObject);
-                checkBox.setChecked(false);
-            }
-            else {
-                mCheckedItems.add(positionObject);
-                checkBox.setChecked(true);
-            }
-
-
-            Toast.makeText(mContext, "Long click position: " + position, Toast.LENGTH_SHORT).show();
-
-            return true;
-        });
-
-        holder.mView.setOnClickListener(v -> {
-            if (!mCheckedItems.isEmpty()) {
-                if (mCheckedItems.contains(positionObject)) {
-                    mCheckedItems.remove(positionObject);
+            holder.mView.setOnLongClickListener(v -> {
+                if (mCheckedIds.contains(id)) {
+                    mCheckedIds.remove(id);
                     checkBox.setChecked(false);
                 }
                 else {
-                    mCheckedItems.add(positionObject);
+                    mCheckedIds.add(id);
                     checkBox.setChecked(true);
                 }
-            }
 
-            Toast.makeText(mContext, "Click position: " + position, Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, "Long click position: " + position, Toast.LENGTH_SHORT).show();
 
-        });
+                return true;
+            });
 
+            holder.mView.setOnClickListener(v -> {
+                if (!mCheckedIds.isEmpty()) {
+                    if (mCheckedIds.contains(id)) {
+                        mCheckedIds.remove(id);
+                        checkBox.setChecked(false);
+                    }
+                    else {
+                        mCheckedIds.add(id);
+                        checkBox.setChecked(true);
+                    }
+                }
 
+                Toast.makeText(mContext, "Click position: " + position, Toast.LENGTH_SHORT).show();
+            });
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     // Return the size of your dataset (invoked by the layout manager)
@@ -124,11 +116,15 @@ public class TrackItemAdapter extends RecyclerView.Adapter<TrackItemAdapter.View
         return mDatabaseHelper;
     }
 
+    public List<Long> getCheckedIds() {
+        return mCheckedIds;
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
         public View mView;
 
-        public ViewHolder(View view, TrackItemAdapter adapter) {
+        public ViewHolder(View view) {
             super(view);
             mView = view;
         }
