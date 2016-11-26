@@ -29,18 +29,6 @@ public class MainActivity extends AppCompatActivity {
                 .replace(R.id.FragmentView, trackedItemFragment)
                 .commit();
 
-//        trackedItemFragment.setRowListener(id -> {
-//
-//            SimpleRecordListFragment simpleRecordListFragment = SimpleRecordListFragment.newInstance();
-//
-//            simpleRecordListFragment.Bind(id);
-//
-//            getFragmentManager().beginTransaction()
-//                    .replace(R.id.FragmentView, simpleRecordListFragment)
-//                    .addToBackStack(null)
-//                    .commit();
-//        });
-
         getDatabaseHelper().addDBListener(this::onDatabaseChange);
 
         onDatabaseChange();

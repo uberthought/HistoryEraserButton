@@ -6,14 +6,11 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
-import android.util.Log;
-import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
@@ -142,8 +139,6 @@ public class TrackedItemFragment extends Fragment {
                     .replace(R.id.FragmentView, simpleRecordFragment)
                     .addToBackStack(null)
                     .commit();
-
-//            Toast.makeText(getContext(), "Click position: " + position + " id: " + trackedItemId, Toast.LENGTH_SHORT).show();
         });
         return adapter;
     }

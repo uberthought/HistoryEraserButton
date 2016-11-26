@@ -1,7 +1,6 @@
 package org.uberthought.myapplication;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,7 +14,6 @@ import com.j256.ormlite.dao.Dao;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 class SimpleRecordAdapter extends RecyclerView.Adapter<SimpleRecordAdapter.ViewHolder> {
@@ -143,23 +141,4 @@ class SimpleRecordAdapter extends RecyclerView.Adapter<SimpleRecordAdapter.ViewH
             mView = view;
         }
     }
-
-    /*
-    @Override
-    public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
-        return LayoutInflater.from(context).inflate(R.layout.entry_cell, viewGroup, false);
-    }
-
-    @Override
-    public void bindView(View view, Context context, Cursor cursor) {
-        Long dateOffset = cursor.getLong(cursor.getColumnIndex("dateOffset"));
-        Date date = new Date(dateOffset);
-
-        TextView textView = (TextView) view.findViewById((R.id.textView2));
-        textView.setText(date.toString());
-
-        CheckableLinearLayout checkableLinearLayout = (CheckableLinearLayout) view;
-        checkableLinearLayout.setCheckable(isCheckable());
-    }
-*/
 }

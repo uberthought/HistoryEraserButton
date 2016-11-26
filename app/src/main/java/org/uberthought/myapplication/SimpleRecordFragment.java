@@ -2,16 +2,13 @@ package org.uberthought.myapplication;
 
 import android.app.AlertDialog;
 import android.app.Fragment;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
@@ -59,21 +56,27 @@ public class SimpleRecordFragment extends Fragment {
         assert addButton != null;
         addButton.setOnClickListener((v) -> {
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-            final EditText input = new EditText(getContext());
-            input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
-            builder.setView(input);
+            try {
+                Dao<TrackedItem, Long> trackedItemDao = null;
+                trackedItemDao = getDatabaseHelper().getDao(TrackedItem.class);
+                TrackedItem trackedItem = trackedItemDao.queryForId(mTrackedItemId);
 
-            builder.setPositiveButton("OK", (dialog, which) -> {
+                Date currDateTime = new Date(System.currentTimeMillis());
 
-                TrackedItem.createOrIncrement(input.getText().toString(), getDatabaseHelper());
+                // create the new record
+                SimpleRecord simpleRecord = getDatabaseHelper().create(SimpleRecord.class);
+                simpleRecord.setDate(currDateTime);
+                getDatabaseHelper().update(simpleRecord);
 
-                getDatabaseHelper().dbChanged();
-            });
+                // add the record to the tracked item
+                trackedItem.getSimpleRecords().add(simpleRecord);
+                getDatabaseHelper().update(trackedItem);
 
-            builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
 
-            builder.show();
+            getDatabaseHelper().dbChanged();
         });
 
         Button deleteButton = (Button) view.findViewById(R.id.deleteButton);
@@ -88,7 +91,7 @@ public class SimpleRecordFragment extends Fragment {
                             List<Long> checkedIds = mAdapter.getCheckedIds();
 
                             // delete them
-                            Dao<TrackedItem, Long> dao = getDatabaseHelper().getDao(TrackedItem.class);
+                            Dao<SimpleRecord, Long> dao = getDatabaseHelper().getDao(SimpleRecord.class);
                             dao.deleteIds(checkedIds);
                         } catch (SQLException e) {
                             e.printStackTrace();
@@ -116,36 +119,6 @@ public class SimpleRecordFragment extends Fragment {
         });
 
         getDatabaseHelper().addDBListener(this::onDatabaseChange);
-
-
-
-/*
-        @SuppressWarnings("ConstantConditions") Button addButton = (Button) getView().findViewById(R.id.addButton);
-        assert addButton != null;
-        addButton.setOnClickListener(view1 -> {
-            try {
-                Dao<TrackedItem, Long> trackedItemDao = getDatabaseHelper().getDao(TrackedItem.class);
-                TrackedItem trackedItem = trackedItemDao.queryForId(mTrackedItemId);
-
-                Date currDateTime = new Date(System.currentTimeMillis());
-
-                // create the new record
-                SimpleRecord simpleRecord = getDatabaseHelper().create(SimpleRecord.class);
-                simpleRecord.setDate(currDateTime);
-                getDatabaseHelper().update(simpleRecord);
-
-                // add the record to the tracked item
-                trackedItem.getSimpleRecords().add(simpleRecord);
-                getDatabaseHelper().update(trackedItem);
-
-                databaseChanged();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        });
-
-        getDatabaseHelper().addDBListener(this::onDatabaseChange);
-        */
     }
 
     MainDBHelper getDatabaseHelper() {
@@ -158,22 +131,7 @@ public class SimpleRecordFragment extends Fragment {
         mAdapter = new SimpleRecordAdapter(getContext(), mTrackedItemId);
         mRecyclerView.swapAdapter(mAdapter, true);
     }
-/*
-    @Override
-    Cursor createCursor() {
-        try {
-            return getDatabaseHelper().getSimpleRecordCursor(mTrackedItemId);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
-    @Override
-    void deleteItems(long[] itemIds) {
-        getDatabaseHelper().deleteItems(SimpleRecord.class, itemIds);
-    }
-*/
     public void Bind(Long id) {
         mTrackedItemId = id;
     }
