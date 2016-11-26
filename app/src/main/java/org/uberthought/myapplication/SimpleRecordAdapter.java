@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
@@ -18,7 +17,7 @@ import java.util.List;
 
 class SimpleRecordAdapter extends RecyclerView.Adapter<SimpleRecordAdapter.ViewHolder> {
 
-    long mTrackedItemId;
+    private long mTrackedItemId;
 
     private MainDBHelper mDatabaseHelper;
     private Context mContext;
@@ -44,8 +43,7 @@ class SimpleRecordAdapter extends RecyclerView.Adapter<SimpleRecordAdapter.ViewH
                 .inflate(R.layout.simplerecord_cell, parent, false);
         // set the view's size, margins, paddings and layout parameters
 
-        SimpleRecordAdapter.ViewHolder vh = new SimpleRecordAdapter.ViewHolder(view);
-        return vh;
+        return new SimpleRecordAdapter.ViewHolder(view);
     }
 
     // Replace the contents of a view (invoked by the layout manager)
@@ -70,13 +68,10 @@ class SimpleRecordAdapter extends RecyclerView.Adapter<SimpleRecordAdapter.ViewH
                 if (mCheckedIds.contains(id)) {
                     mCheckedIds.remove(id);
                     checkBox.setChecked(false);
-                }
-                else {
+                } else {
                     mCheckedIds.add(id);
                     checkBox.setChecked(true);
                 }
-
-                Toast.makeText(mContext, "Long click position: " + position, Toast.LENGTH_SHORT).show();
 
                 return true;
             });
@@ -86,14 +81,11 @@ class SimpleRecordAdapter extends RecyclerView.Adapter<SimpleRecordAdapter.ViewH
                     if (mCheckedIds.contains(id)) {
                         mCheckedIds.remove(id);
                         checkBox.setChecked(false);
-                    }
-                    else {
+                    } else {
                         mCheckedIds.add(id);
                         checkBox.setChecked(true);
                     }
                 }
-
-                Toast.makeText(mContext, "Click position: " + position, Toast.LENGTH_SHORT).show();
             });
         } catch (SQLException e) {
             e.printStackTrace();
@@ -128,15 +120,19 @@ class SimpleRecordAdapter extends RecyclerView.Adapter<SimpleRecordAdapter.ViewH
         return mDatabaseHelper;
     }
 
-    public List<Long> getCheckedIds() {
+    void clearCheckedItems() {
+        mCheckedIds.clear();
+    }
+
+    List<Long> getCheckedIds() {
         return mCheckedIds;
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
-        public View mView;
+        View mView;
 
-        public ViewHolder(View view) {
+        ViewHolder(View view) {
             super(view);
             mView = view;
         }

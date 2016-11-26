@@ -110,12 +110,8 @@ public class SimpleRecordFragment extends Fragment {
         //noinspection ConstantConditions
         clearButton.setOnClickListener(v -> {
             // clear checked items
-
-            // after 1/2 a second, clear the checkboxes
-            //noinspection ConstantConditions
-            clearButton.postDelayed(() -> {
-                // clear the checkboxes
-            }, 500);
+            mAdapter.clearCheckedItems();
+            mRecyclerView.swapAdapter(mAdapter, true);
         });
 
         getDatabaseHelper().addDBListener(this::onDatabaseChange);
