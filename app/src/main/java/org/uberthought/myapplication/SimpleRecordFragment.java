@@ -44,7 +44,7 @@ public class SimpleRecordFragment extends Fragment {
         mLayoutManager = new LinearLayoutManager(this.getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        mAdapter = new SimpleRecordAdapter(getContext());
+        mAdapter = new SimpleRecordAdapter(getContext(), mTrackedItemId);
         // Set CustomAdapter as the adapter for RecyclerView.
         mRecyclerView.setAdapter(mAdapter);
 
@@ -155,7 +155,7 @@ public class SimpleRecordFragment extends Fragment {
     }
 
     void onDatabaseChange() {
-        mAdapter = new SimpleRecordAdapter(getContext());
+        mAdapter = new SimpleRecordAdapter(getContext(), mTrackedItemId);
         mRecyclerView.swapAdapter(mAdapter, true);
     }
 /*

@@ -75,8 +75,6 @@ public class TrackItemAdapter extends RecyclerView.Adapter<TrackItemAdapter.View
                     checkBox.setChecked(true);
                 }
 
-                Toast.makeText(mContext, "Long click position: " + position, Toast.LENGTH_SHORT).show();
-
                 return true;
             });
 
@@ -92,11 +90,21 @@ public class TrackItemAdapter extends RecyclerView.Adapter<TrackItemAdapter.View
                     }
                 }
 
-                Toast.makeText(mContext, "Click position: " + position, Toast.LENGTH_SHORT).show();
+                if (onClickListener != null)
+                    onClickListener.onClick(position);
             });
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public interface RecyclerItemClickListener {
+        void onClick(int position);
+    }
+    RecyclerItemClickListener onClickListener;
+
+    void SetOnItemTouchListener(RecyclerItemClickListener onClickListener) {
+        this.onClickListener = onClickListener;
     }
 
     // Return the size of your dataset (invoked by the layout manager)
@@ -128,6 +136,17 @@ public class TrackItemAdapter extends RecyclerView.Adapter<TrackItemAdapter.View
             super(view);
             mView = view;
         }
+
     }
 
+    @Override
+    public long getItemId(int position) {
+        try {
+            TrackedItem trackedItem = mDao.queryForAll().get((int) position);
+            return trackedItem.getId();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
 }

@@ -43,8 +43,8 @@ public class TrackedItemFragment extends Fragment {
         mLayoutManager = new LinearLayoutManager(this.getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        mAdapter = new TrackItemAdapter(getContext());
         // Set CustomAdapter as the adapter for RecyclerView.
+        mAdapter = createAdapter();
         mRecyclerView.setAdapter(mAdapter);
 
         return rootView;
@@ -125,8 +125,27 @@ public class TrackedItemFragment extends Fragment {
     }
 
     void onDatabaseChange() {
-        mAdapter = new TrackItemAdapter(getContext());
+        mAdapter = createAdapter();
         mRecyclerView.swapAdapter(mAdapter, true);
+    }
+
+    private TrackItemAdapter createAdapter() {
+        TrackItemAdapter adapter = new TrackItemAdapter(getContext());
+        adapter.SetOnItemTouchListener(position -> {
+            long trackedItemId = adapter.getItemId(position);
+
+            SimpleRecordFragment simpleRecordFragment = SimpleRecordFragment.newInstance();
+
+            simpleRecordFragment.Bind(trackedItemId);
+
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.FragmentView, simpleRecordFragment)
+                    .addToBackStack(null)
+                    .commit();
+
+//            Toast.makeText(getContext(), "Click position: " + position + " id: " + trackedItemId, Toast.LENGTH_SHORT).show();
+        });
+        return adapter;
     }
 }
 

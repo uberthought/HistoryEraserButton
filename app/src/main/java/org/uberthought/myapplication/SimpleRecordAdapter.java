@@ -20,13 +20,16 @@ import java.util.List;
 
 class SimpleRecordAdapter extends RecyclerView.Adapter<SimpleRecordAdapter.ViewHolder> {
 
+    long mTrackedItemId;
+
     private MainDBHelper mDatabaseHelper;
     private Context mContext;
     private Dao<SimpleRecord, Long> mDao;
     private List<Long> mCheckedIds = new ArrayList<>();
 
-    SimpleRecordAdapter(Context context) {
+    SimpleRecordAdapter(Context context, long trackedItemId) {
         mContext = context;
+        mTrackedItemId = trackedItemId;
 
         try {
             mDao = getDatabaseHelper(mContext).getDao(SimpleRecord.class);
@@ -54,12 +57,12 @@ class SimpleRecordAdapter extends RecyclerView.Adapter<SimpleRecordAdapter.ViewH
         // - replace the contents of the view with that element
 
         try {
-            SimpleRecord simpleRecord = mDao.queryForAll().get((int) position);
+            SimpleRecord simpleRecord = getSimpleRecord(position);
             String text = simpleRecord.getDate().toString();
-            final Long  id = simpleRecord.getId();
+            final Long id = simpleRecord.getId();
             boolean checked = mCheckedIds.contains(id);
 
-            TextView textView = (TextView) holder.mView.findViewById((R.id.textView2));
+            TextView textView = (TextView) holder.mView.findViewById((R.id.textView));
             textView.setText(text);
 
             CheckBox checkBox = (CheckBox) holder.mView.findViewById(R.id.checkBox);
@@ -99,11 +102,22 @@ class SimpleRecordAdapter extends RecyclerView.Adapter<SimpleRecordAdapter.ViewH
         }
     }
 
+    private SimpleRecord getSimpleRecord(int position) throws SQLException {
+        return mDao.queryBuilder()
+                .where()
+                .eq("trackedItem_id", mTrackedItemId)
+                .query()
+                .get(position);
+    }
+
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
         try {
-            return (int) mDao.countOf();
+            return (int) mDao.queryBuilder()
+                    .where()
+                    .eq("trackedItem_id", mTrackedItemId)
+                    .countOf();
         } catch (SQLException e) {
             e.printStackTrace();
         }

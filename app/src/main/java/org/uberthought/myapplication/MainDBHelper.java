@@ -149,6 +149,14 @@ public class MainDBHelper extends OrmLiteSqliteOpenHelper {
         }
     }
 
+    List<SimpleRecord> getSimpleRecords(long trackedItemId) throws SQLException {
+            return getDao(SimpleRecord.class)
+                    .queryBuilder()
+                    .where()
+                    .eq("trackedItem_id", trackedItemId)
+                    .query();
+    }
+
     Cursor getSimpleRecordCursor(long trackedItemId) throws SQLException {
         AndroidDatabaseResults results = (AndroidDatabaseResults) getDao(SimpleRecord.class)
                 .queryBuilder()
