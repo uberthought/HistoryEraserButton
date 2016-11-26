@@ -22,24 +22,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        TrackedItemListFragment trackedItemListFragment = TrackedItemListFragment.newInstance();
+        TrackedItemFragment trackedItemFragment = TrackedItemFragment.newInstance();
 
         getFragmentManager()
                 .beginTransaction()
-                .replace(R.id.FragmentView, trackedItemListFragment)
+                .replace(R.id.FragmentView, trackedItemFragment)
                 .commit();
-
-        trackedItemListFragment.setRowListener(id -> {
-
-            SimpleRecordListFragment simpleRecordListFragment = SimpleRecordListFragment.newInstance();
-
-            simpleRecordListFragment.Bind(id);
-
-            getFragmentManager().beginTransaction()
-                    .replace(R.id.FragmentView, simpleRecordListFragment)
-                    .addToBackStack(null)
-                    .commit();
-        });
 
         getDatabaseHelper().addDBListener(this::onDatabaseChange);
 

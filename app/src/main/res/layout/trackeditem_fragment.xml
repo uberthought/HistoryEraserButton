@@ -4,35 +4,23 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-
-    <LinearLayout
-        android:layout_width="match_parent"
+    <Button
+        android:id="@+id/addButton"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:text="@string/addButtonTitle" />
 
-        <Button
-            android:id="@+id/addButton"
-            style="@android:style/Widget.DeviceDefault.Button.Borderless"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/addButtonTitle" />
-    </LinearLayout>
-
-    <ListView
-        android:id="@android:id/list"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/trackeditem_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:choiceMode="multipleChoice" />
+        android:layout_weight="1" />
 
     <LinearLayout
         android:id="@+id/bottomBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="0"
-        android:orientation="horizontal"
-        android:visibility="gone">
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/deleteButton"
