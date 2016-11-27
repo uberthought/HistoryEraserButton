@@ -39,7 +39,10 @@ class TrackedItem {
     private static TrackedItem find(String name, MainDBHelper databaseHelper) {
         try {
             Dao<TrackedItem, Long> trackedItemDao = databaseHelper.getDao(TrackedItem.class);
-            List<TrackedItem> trackedItemList = trackedItemDao.queryForEq("name", name);
+            List<TrackedItem> trackedItemList = trackedItemDao.queryBuilder()
+                    .where()
+                    .like("name", name)
+                    .query();
             if (!trackedItemList.isEmpty())
                 return trackedItemList.get(0);
         } catch (SQLException e) {

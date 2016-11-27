@@ -1,9 +1,12 @@
 package org.uberthought.myapplication;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -11,6 +14,7 @@ import android.widget.Toast;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
@@ -24,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
         TrackedItemFragment trackedItemFragment = TrackedItemFragment.newInstance();
 
-        getFragmentManager()
+        getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.FragmentView, trackedItemFragment)
                 .commit();
@@ -33,13 +37,20 @@ public class MainActivity extends AppCompatActivity {
 
         onDatabaseChange();
 
-        Button speechInputButton = (Button)findViewById(R.id.speech_input);
-        speechInputButton.setOnClickListener(v -> {
-            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-            intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speech recognition demo");
-            startActivityForResult(intent, 1234);
-        });
+        List<ResolveInfo> resolveInfos = this.getApplicationContext().getPackageManager().queryIntentActivities(new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH), PackageManager.MATCH_DEFAULT_ONLY);
+
+        Button speechInputButton = (Button) findViewById(R.id.speech_input);
+
+        if (resolveInfos.size() > 0) {
+            speechInputButton.setOnClickListener(v -> {
+                Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speech recognition demo");
+                startActivityForResult(intent, 1234);
+            });
+        } else {
+            speechInputButton.setVisibility(View.GONE);
+        }
     }
 
     @Override
