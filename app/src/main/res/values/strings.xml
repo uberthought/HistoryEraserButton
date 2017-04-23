@@ -4,4 +4,5 @@
     <string name="deleteButtonTitle">Delete Last</string>
     <string name="delete">Delete</string>
     <string name="clear">Clear</string>
+    <string name="speech_input">Speech Input</string>
 </resources>

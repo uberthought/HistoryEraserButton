@@ -8,10 +8,10 @@
     tools:context="org.uberthought.myapplication.MainActivity">
 
     <Button
-        android:text="Speech Input"
+        android:id="@+id/speech_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/speech_input" />
+        android:text="@string/speech_input" />
 
     <TextView
         android:id="@+id/textView"

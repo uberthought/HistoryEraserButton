@@ -10,20 +10,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.j256.ormlite.android.apptools.OpenHelperManager;
-import com.j256.ormlite.dao.Dao;
-
-import java.sql.SQLException;
-import java.util.Date;
-import java.util.List;
-
 public class SimpleRecordFragment extends Fragment {
 
-    private long mTrackedItemId;
+    private String mTrackedItemName;
     private RecyclerView mRecyclerView;
     private SimpleRecordAdapter mAdapter;
-    private LinearLayoutManager mLayoutManager;
-    private MainDBHelper mDatabaseHelper;
 
 
     public static SimpleRecordFragment newInstance() {
@@ -38,10 +29,10 @@ public class SimpleRecordFragment extends Fragment {
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.simplerecord_recyclerview);
 
         // use a linear layout manager
-        mLayoutManager = new LinearLayoutManager(this.getContext());
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(this.getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        mAdapter = new SimpleRecordAdapter(getContext(), mTrackedItemId);
+        mAdapter = new SimpleRecordAdapter(getContext(), mTrackedItemName);
         // Set CustomAdapter as the adapter for RecyclerView.
         mRecyclerView.setAdapter(mAdapter);
 
@@ -54,30 +45,7 @@ public class SimpleRecordFragment extends Fragment {
 
         Button addButton = (Button) view.findViewById(R.id.addButton);
         assert addButton != null;
-        addButton.setOnClickListener((v) -> {
-
-            try {
-                Dao<TrackedItem, Long> trackedItemDao = null;
-                trackedItemDao = getDatabaseHelper().getDao(TrackedItem.class);
-                TrackedItem trackedItem = trackedItemDao.queryForId(mTrackedItemId);
-
-                Date currDateTime = new Date(System.currentTimeMillis());
-
-                // create the new record
-                SimpleRecord simpleRecord = getDatabaseHelper().create(SimpleRecord.class);
-                simpleRecord.setDate(currDateTime);
-                getDatabaseHelper().update(simpleRecord);
-
-                // add the record to the tracked item
-                trackedItem.getSimpleRecords().add(simpleRecord);
-                getDatabaseHelper().update(trackedItem);
-
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-
-            getDatabaseHelper().dbChanged();
-        });
+        addButton.setOnClickListener((v) -> mAdapter.addItem(mTrackedItemName));
 
         Button deleteButton = (Button) view.findViewById(R.id.deleteButton);
         deleteButton.setOnClickListener(v -> {
@@ -85,24 +53,9 @@ public class SimpleRecordFragment extends Fragment {
             alertDialogBuilder
                     .setMessage("Are you sure you want to delete these record")
                     .setCancelable(true)
-                    .setNegativeButton("Delete", (dialogInterface, i) -> {
-                        try {
-                            // build a list of items to delete
-                            List<Long> checkedIds = mAdapter.getCheckedIds();
-
-                            // delete them
-                            Dao<SimpleRecord, Long> dao = getDatabaseHelper().getDao(SimpleRecord.class);
-                            dao.deleteIds(checkedIds);
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
-
-                        // refresh
-                        onDatabaseChange();
-                    });
+                    .setNegativeButton("Delete", (dialogInterface, i) -> mAdapter.deleteChecked(mTrackedItemName));
             AlertDialog alertDialog = alertDialogBuilder.create();
             alertDialog.show();
-
         });
 
         final Button clearButton = (Button) view.findViewById(R.id.clearButton);
@@ -113,23 +66,9 @@ public class SimpleRecordFragment extends Fragment {
             mAdapter.clearCheckedItems();
             mRecyclerView.swapAdapter(mAdapter, true);
         });
-
-        getDatabaseHelper().addDBListener(this::onDatabaseChange);
     }
 
-    MainDBHelper getDatabaseHelper() {
-        if (mDatabaseHelper == null)
-            mDatabaseHelper = OpenHelperManager.getHelper(getContext(), MainDBHelper.class);
-        return mDatabaseHelper;
+    public void Bind(String name) {
+        mTrackedItemName = name;
     }
-
-    void onDatabaseChange() {
-        mAdapter = new SimpleRecordAdapter(getContext(), mTrackedItemId);
-        mRecyclerView.swapAdapter(mAdapter, true);
-    }
-
-    public void Bind(Long id) {
-        mTrackedItemId = id;
-    }
-
 }

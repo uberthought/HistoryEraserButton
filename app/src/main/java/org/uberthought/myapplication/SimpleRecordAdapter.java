@@ -8,31 +8,58 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
-import com.j256.ormlite.android.apptools.OpenHelperManager;
-import com.j256.ormlite.dao.Dao;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 class SimpleRecordAdapter extends RecyclerView.Adapter<SimpleRecordAdapter.ViewHolder> {
 
-    private long mTrackedItemId;
+    private final List<SimpleRecord> mItems = new ArrayList<>();
 
-    private MainDBHelper mDatabaseHelper;
-    private Context mContext;
-    private Dao<SimpleRecord, Long> mDao;
-    private List<Long> mCheckedIds = new ArrayList<>();
+    SimpleRecordAdapter(Context context, String trackedItemName) {
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference reference = database.getReference(TrackedItem.class.getSimpleName() + "/" + trackedItemName);
 
-    SimpleRecordAdapter(Context context, long trackedItemId) {
-        mContext = context;
-        mTrackedItemId = trackedItemId;
+        reference.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Date date = dataSnapshot.getValue(Date.class);
+                mItems.add(new SimpleRecord(date));
+                SimpleRecordAdapter.this.notifyDataSetChanged();
+            }
 
-        try {
-            mDao = getDatabaseHelper(mContext).getDao(SimpleRecord.class);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                Date date = dataSnapshot.getValue(Date.class);
+                mItems.removeIf(trackedItem -> trackedItem.getDate().equals(date));
+                mItems.add(new SimpleRecord(date));
+                SimpleRecordAdapter.this.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                Date date = dataSnapshot.getValue(Date.class);
+                mItems.removeIf(trackedItem -> trackedItem.getDate().equals(date));
+                SimpleRecordAdapter.this.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     // Create new views (invoked by the layout manager)
@@ -41,7 +68,7 @@ class SimpleRecordAdapter extends RecyclerView.Adapter<SimpleRecordAdapter.ViewH
         // create a new view
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.simplerecord_cell, parent, false);
-        // set the view's size, margins, paddings and layout parameters
+        // set the view's size, margins, padding and layout parameters
 
         return new SimpleRecordAdapter.ViewHolder(view);
     }
@@ -49,88 +76,97 @@ class SimpleRecordAdapter extends RecyclerView.Adapter<SimpleRecordAdapter.ViewH
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(SimpleRecordAdapter.ViewHolder holder, int position) {
-        // - get element from your dataset at this position
+        // - get element from your data set at this position
         // - replace the contents of the view with that element
 
-        try {
-            SimpleRecord simpleRecord = getSimpleRecord(position);
-            String text = simpleRecord.getDate().toString();
-            final Long id = simpleRecord.getId();
-            boolean checked = mCheckedIds.contains(id);
+        SimpleRecord simpleRecord = mItems.get(position);
+        TextView textView = (TextView) holder.mView.findViewById((R.id.textView));
+        textView.setText(simpleRecord.getDate().toString());
 
-            TextView textView = (TextView) holder.mView.findViewById((R.id.textView));
-            textView.setText(text);
+        CheckBox checkBox = (CheckBox) holder.mView.findViewById(R.id.checkBox);
+        checkBox.setChecked(simpleRecord.isChecked());
 
-            CheckBox checkBox = (CheckBox) holder.mView.findViewById(R.id.checkBox);
-            checkBox.setChecked(checked);
+        holder.mView.setOnLongClickListener(v -> {
+            simpleRecord.setChecked(!simpleRecord.isChecked());
+            checkBox.setChecked(simpleRecord.isChecked());
+            return true;
+        });
 
-            holder.mView.setOnLongClickListener(v -> {
-                if (mCheckedIds.contains(id)) {
-                    mCheckedIds.remove(id);
-                    checkBox.setChecked(false);
-                } else {
-                    mCheckedIds.add(id);
-                    checkBox.setChecked(true);
+        holder.mView.setOnClickListener(v -> {
+            boolean anyChecked = false;
+            for (SimpleRecord foo : mItems) {
+                if (foo.isChecked()) {
+                    anyChecked = true;
+                    break;
                 }
-
-                return true;
-            });
-
-            holder.mView.setOnClickListener(v -> {
-                if (!mCheckedIds.isEmpty()) {
-                    if (mCheckedIds.contains(id)) {
-                        mCheckedIds.remove(id);
-                        checkBox.setChecked(false);
-                    } else {
-                        mCheckedIds.add(id);
-                        checkBox.setChecked(true);
-                    }
-                }
-            });
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+            }
+            if (anyChecked) {
+                simpleRecord.setChecked(!simpleRecord.isChecked());
+                checkBox.setChecked(simpleRecord.isChecked());
+            }
+        });
     }
 
-    private SimpleRecord getSimpleRecord(int position) throws SQLException {
-        return mDao.queryBuilder()
-                .where()
-                .eq("trackedItem_id", mTrackedItemId)
-                .query()
-                .get(position);
-    }
-
-    // Return the size of your dataset (invoked by the layout manager)
+    // Return the size of your data set (invoked by the layout manager)
     @Override
     public int getItemCount() {
-        try {
-            return (int) mDao.queryBuilder()
-                    .where()
-                    .eq("trackedItem_id", mTrackedItemId)
-                    .countOf();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return 0;
+        return mItems.size();
     }
 
-    private MainDBHelper getDatabaseHelper(Context context) {
-        if (mDatabaseHelper == null)
-            mDatabaseHelper = OpenHelperManager.getHelper(context, MainDBHelper.class);
-        return mDatabaseHelper;
+    void addItem(String trackedItemName) {
+        Date date = new Date(System.currentTimeMillis());
+
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference reference = database.getReference(TrackedItem.class.getSimpleName() + "/" + trackedItemName);
+
+        reference.push().setValue(date);
+    }
+
+    void deleteChecked(String trackedItemName) {
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference reference = database.getReference(TrackedItem.class.getSimpleName() + "/" + trackedItemName);
+
+        List<Date> checkedItems = getCheckedItems();
+
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (Date date : checkedItems) {
+                    for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                        Date childDate = childSnapshot.getValue(Date.class);
+                        if (childDate.equals(date))
+                            childSnapshot.getRef().removeValue();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     void clearCheckedItems() {
-        mCheckedIds.clear();
+        for (SimpleRecord simpleRecord : mItems) {
+            simpleRecord.setChecked(false);
+        }
     }
 
-    List<Long> getCheckedIds() {
-        return mCheckedIds;
+    private List<Date> getCheckedItems() {
+        List<Date> checkItems = new ArrayList<>();
+
+        for (SimpleRecord simpleRecord : mItems) {
+            if (simpleRecord.isChecked())
+                checkItems.add(simpleRecord.getDate());
+        }
+
+        return checkItems;
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
-        View mView;
+        final View mView;
 
         ViewHolder(View view) {
             super(view);

@@ -12,18 +12,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.j256.ormlite.android.apptools.OpenHelperManager;
-import com.j256.ormlite.dao.Dao;
-
-import java.sql.SQLException;
-import java.util.List;
-
 public class TrackedItemFragment extends Fragment {
 
     private RecyclerView mRecyclerView;
     private TrackItemAdapter mAdapter;
-    private LinearLayoutManager mLayoutManager;
-    private MainDBHelper mDatabaseHelper;
 
     public static TrackedItemFragment newInstance() {
         return new TrackedItemFragment();
@@ -37,7 +29,7 @@ public class TrackedItemFragment extends Fragment {
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.trackeditem_recyclerview);
 
         // use a linear layout manager
-        mLayoutManager = new LinearLayoutManager(this.getContext());
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(this.getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         // Set CustomAdapter as the adapter for RecyclerView.
@@ -60,12 +52,7 @@ public class TrackedItemFragment extends Fragment {
             input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
             builder.setView(input);
 
-            builder.setPositiveButton("OK", (dialog, which) -> {
-
-                TrackedItem.createOrIncrement(input.getText().toString(), getDatabaseHelper());
-
-                getDatabaseHelper().dbChanged();
-            });
+            builder.setPositiveButton("OK", (dialog, which) -> mAdapter.addItem(input.getText().toString()));
 
             builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 
@@ -78,21 +65,7 @@ public class TrackedItemFragment extends Fragment {
             alertDialogBuilder
                     .setMessage("Are you sure you want to delete these record")
                     .setCancelable(true)
-                    .setNegativeButton("Delete", (dialogInterface, i) -> {
-                        try {
-                            // build a list of items to delete
-                            List<Long> checkedIds = mAdapter.getCheckedIds();
-
-                            // delete them
-                            Dao<TrackedItem, Long> dao = getDatabaseHelper().getDao(TrackedItem.class);
-                            dao.deleteIds(checkedIds);
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
-
-                        // refresh
-                        onDatabaseChange();
-                    });
+                    .setNegativeButton("Delete", (dialogInterface, i) -> mAdapter.deleteChecked());
             AlertDialog alertDialog = alertDialogBuilder.create();
             alertDialog.show();
 
@@ -106,30 +79,16 @@ public class TrackedItemFragment extends Fragment {
             mAdapter.clearCheckedItems();
             mRecyclerView.swapAdapter(mAdapter, true);
         });
-
-        getDatabaseHelper().addDBListener(this::onDatabaseChange);
-    }
-
-
-    MainDBHelper getDatabaseHelper() {
-        if (mDatabaseHelper == null)
-            mDatabaseHelper = OpenHelperManager.getHelper(getContext(), MainDBHelper.class);
-        return mDatabaseHelper;
-    }
-
-    void onDatabaseChange() {
-        mAdapter = createAdapter();
-        mRecyclerView.swapAdapter(mAdapter, true);
     }
 
     private TrackItemAdapter createAdapter() {
         TrackItemAdapter adapter = new TrackItemAdapter(getContext());
         adapter.SetOnItemTouchListener(position -> {
-            long trackedItemId = adapter.getItemId(position);
+            TrackedItem trackedItem = mAdapter.getItem(position);
 
             SimpleRecordFragment simpleRecordFragment = SimpleRecordFragment.newInstance();
 
-            simpleRecordFragment.Bind(trackedItemId);
+            simpleRecordFragment.Bind(trackedItem.getName());
 
             getFragmentManager().beginTransaction()
                     .replace(R.id.FragmentView, simpleRecordFragment)

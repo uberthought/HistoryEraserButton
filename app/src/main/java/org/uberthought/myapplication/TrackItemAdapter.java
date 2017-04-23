@@ -8,30 +8,61 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
-import com.j256.ormlite.android.apptools.OpenHelperManager;
-import com.j256.ormlite.dao.Dao;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 class TrackItemAdapter extends RecyclerView.Adapter<TrackItemAdapter.ViewHolder> {
 
+    private final List<TrackedItem> mItems = new ArrayList<>();
     private RecyclerItemClickListener onClickListener;
-    private MainDBHelper mDatabaseHelper;
-    private Context mContext;
-    private Dao<TrackedItem, Long> mDao;
-    private List<Long> mCheckedIds = new ArrayList<>();
 
     TrackItemAdapter(Context context) {
-        mContext = context;
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference reference = database.getReference(TrackedItem.class.getSimpleName());
 
-        try {
-            mDao = getDatabaseHelper(mContext).getDao(TrackedItem.class);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        reference.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                String name = dataSnapshot.getKey();
+                long count = dataSnapshot.getChildrenCount();
+                mItems.add(new TrackedItem(name, count));
+                TrackItemAdapter.this.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                String name = dataSnapshot.getKey();
+                long count = dataSnapshot.getChildrenCount();
+                mItems.removeIf(trackedItem -> trackedItem.getName().equals(name));
+                mItems.add(new TrackedItem(name, count));
+                TrackItemAdapter.this.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                String name = dataSnapshot.getKey();
+                mItems.removeIf(trackedItem -> trackedItem.getName().equals(name));
+                TrackItemAdapter.this.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     // Create new views (invoked by the layout manager)
@@ -40,7 +71,7 @@ class TrackItemAdapter extends RecyclerView.Adapter<TrackItemAdapter.ViewHolder>
         // create a new view
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.trackeditem_cell, parent, false);
-        // set the view's size, margins, paddings and layout parameters
+        // set the view's size, margins, padding and layout parameters
 
         return new ViewHolder(view);
     }
@@ -48,91 +79,89 @@ class TrackItemAdapter extends RecyclerView.Adapter<TrackItemAdapter.ViewHolder>
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        // - get element from your dataset at this position
+        // - get element from your data set at this position
         // - replace the contents of the view with that element
 
-        try {
-            TrackedItem trackedItem = mDao.queryForAll().get(position);
-            String name = trackedItem.getName();
-            int count = trackedItem.getSimpleRecords().size();
-            final Long  id = trackedItem.getId();
-            boolean checked = mCheckedIds.contains(id);
+        TrackedItem trackedItem = mItems.get(position);
 
-            TextView textView = (TextView) holder.mView.findViewById((R.id.textView2));
-            textView.setText(String.format(Locale.getDefault(), "%s %d", name, count));
+        TextView textView = (TextView) holder.mView.findViewById((R.id.textView2));
+        textView.setText(String.format(Locale.getDefault(), "%s %d", trackedItem.getName(), trackedItem.getCount()));
 
-            CheckBox checkBox = (CheckBox) holder.mView.findViewById(R.id.checkBox);
-            checkBox.setChecked(checked);
+        CheckBox checkBox = (CheckBox) holder.mView.findViewById(R.id.checkBox);
+        checkBox.setChecked(trackedItem.isChecked());
 
-            holder.mView.setOnLongClickListener(v -> {
-                if (mCheckedIds.contains(id)) {
-                    mCheckedIds.remove(id);
-                    checkBox.setChecked(false);
+        holder.mView.setOnLongClickListener(v -> {
+            trackedItem.setChecked(!trackedItem.isChecked());
+            checkBox.setChecked(trackedItem.isChecked());
+
+            return true;
+        });
+
+        holder.mView.setOnClickListener(v -> {
+            boolean anyChecked = false;
+            for (TrackedItem foo : mItems) {
+                if (foo.isChecked()) {
+                    anyChecked = true;
+                    break;
                 }
-                else {
-                    mCheckedIds.add(id);
-                    checkBox.setChecked(true);
-                }
-
-                return true;
-            });
-
-            holder.mView.setOnClickListener(v -> {
-                if (!mCheckedIds.isEmpty()) {
-                    if (mCheckedIds.contains(id)) {
-                        mCheckedIds.remove(id);
-                        checkBox.setChecked(false);
-                    }
-                    else {
-                        mCheckedIds.add(id);
-                        checkBox.setChecked(true);
-                    }
-                } else if (onClickListener != null)
-                    onClickListener.onClick(position);
-            });
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+            }
+            if (anyChecked) {
+                trackedItem.setChecked(!trackedItem.isChecked());
+                checkBox.setChecked(trackedItem.isChecked());
+            } else if (onClickListener != null)
+                onClickListener.onClick(position);
+        });
     }
 
     void clearCheckedItems() {
-        mCheckedIds.clear();
+        for (TrackedItem foo : mItems) {
+            foo.setChecked(false);
+        }
     }
 
     void SetOnItemTouchListener(RecyclerItemClickListener onClickListener) {
         this.onClickListener = onClickListener;
     }
 
-    // Return the size of your dataset (invoked by the layout manager)
+    // Return the size of your data set (invoked by the layout manager)
     @Override
     public int getItemCount() {
-        try {
-            return (int) mDao.countOf();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        return mItems.size();
+    }
+
+    TrackedItem getItem(int i) {
+        return mItems.get(i);
+    }
+
+    private List<String> getCheckedItems() {
+        List<String> checkItems = new ArrayList<>();
+
+        for (TrackedItem trackedItem : mItems) {
+            if (trackedItem.isChecked())
+                checkItems.add(trackedItem.getName());
         }
-        return 0;
+
+        return checkItems;
     }
 
-    private MainDBHelper getDatabaseHelper(Context context) {
-        if (mDatabaseHelper == null)
-            mDatabaseHelper = OpenHelperManager.getHelper(context, MainDBHelper.class);
-        return mDatabaseHelper;
+    void addItem(String trackedItemName) {
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference ref = database.getReference(TrackedItem.class.getSimpleName() + "/" + trackedItemName);
+
+        Date currDateTime = new Date(System.currentTimeMillis());
+
+        ref.push().setValue(currDateTime);
     }
 
-    List<Long> getCheckedIds() {
-        return mCheckedIds;
-    }
+    void deleteChecked() {
+        List<String> checkedItems = getCheckedItems();
 
-    @Override
-    public long getItemId(int position) {
-        try {
-            TrackedItem trackedItem = mDao.queryForAll().get(position);
-            return trackedItem.getId();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+
+        for (String checkedItem : checkedItems) {
+            DatabaseReference reference = database.getReference(TrackedItem.class.getSimpleName() + "/" + checkedItem);
+            reference.removeValue();
         }
-        return -1;
     }
 
     interface RecyclerItemClickListener {
@@ -141,7 +170,7 @@ class TrackItemAdapter extends RecyclerView.Adapter<TrackItemAdapter.ViewHolder>
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
-        View mView;
+        final View mView;
 
         ViewHolder(View view) {
             super(view);
