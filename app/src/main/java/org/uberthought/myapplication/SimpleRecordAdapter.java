@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -25,7 +27,8 @@ class SimpleRecordAdapter extends RecyclerView.Adapter<SimpleRecordAdapter.ViewH
 
     SimpleRecordAdapter(Context context, String trackedItemName) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference reference = database.getReference(TrackedItem.class.getSimpleName() + "/" + trackedItemName);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        DatabaseReference reference = database.getReference(user.getUid() + "/" + TrackedItem.class.getSimpleName() + "/" + trackedItemName);
 
         reference.addChildEventListener(new ChildEventListener() {
             @Override
@@ -117,14 +120,16 @@ class SimpleRecordAdapter extends RecyclerView.Adapter<SimpleRecordAdapter.ViewH
         Date date = new Date(System.currentTimeMillis());
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference reference = database.getReference(TrackedItem.class.getSimpleName() + "/" + trackedItemName);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        DatabaseReference reference = database.getReference(user.getUid() + "/" + TrackedItem.class.getSimpleName() + "/" + trackedItemName);
 
         reference.push().setValue(date);
     }
 
     void deleteChecked(String trackedItemName) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference reference = database.getReference(TrackedItem.class.getSimpleName() + "/" + trackedItemName);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        DatabaseReference reference = database.getReference(user.getUid() + "/" + TrackedItem.class.getSimpleName() + "/" + trackedItemName);
 
         List<Date> checkedItems = getCheckedItems();
 

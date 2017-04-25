@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -26,7 +28,8 @@ class TrackItemAdapter extends RecyclerView.Adapter<TrackItemAdapter.ViewHolder>
 
     TrackItemAdapter(Context context) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference reference = database.getReference(TrackedItem.class.getSimpleName());
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        DatabaseReference reference = database.getReference(user.getUid() + "/" + TrackedItem.class.getSimpleName());
 
         reference.addChildEventListener(new ChildEventListener() {
             @Override
@@ -63,6 +66,16 @@ class TrackItemAdapter extends RecyclerView.Adapter<TrackItemAdapter.ViewHolder>
 
             }
         });
+    }
+
+    public static void addItem(String trackedItemName) {
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        DatabaseReference ref = database.getReference(user.getUid() + "/" + TrackedItem.class.getSimpleName() + "/" + trackedItemName);
+
+        Date currDateTime = new Date(System.currentTimeMillis());
+
+        ref.push().setValue(currDateTime);
     }
 
     // Create new views (invoked by the layout manager)
@@ -144,22 +157,14 @@ class TrackItemAdapter extends RecyclerView.Adapter<TrackItemAdapter.ViewHolder>
         return checkItems;
     }
 
-    void addItem(String trackedItemName) {
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference ref = database.getReference(TrackedItem.class.getSimpleName() + "/" + trackedItemName);
-
-        Date currDateTime = new Date(System.currentTimeMillis());
-
-        ref.push().setValue(currDateTime);
-    }
-
     void deleteChecked() {
         List<String> checkedItems = getCheckedItems();
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         for (String checkedItem : checkedItems) {
-            DatabaseReference reference = database.getReference(TrackedItem.class.getSimpleName() + "/" + checkedItem);
+            DatabaseReference reference = database.getReference(user.getUid() + "/" + TrackedItem.class.getSimpleName() + "/" + checkedItem);
             reference.removeValue();
         }
     }
