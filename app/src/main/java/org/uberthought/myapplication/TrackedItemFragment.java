@@ -20,6 +20,7 @@ import java.util.ArrayList;
 
 public class TrackedItemFragment extends Fragment {
 
+    private static final String TAG = "TrackedItemFragment";
     private RecyclerView mRecyclerView;
     private TrackItemAdapter mAdapter;
 

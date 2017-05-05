@@ -41,9 +41,10 @@ public class SimpleRecordFragment extends Fragment {
             @Override
             public void onChanged() {
                 super.onChanged();
+
                 if (mAdapter != null && mAdapter.getItemCount() == 0) {
                     mAdapter = null;
-                    getActivity().getFragmentManager().popBackStack();
+                    getFragmentManager().popBackStack();
                 }
             }
         });
