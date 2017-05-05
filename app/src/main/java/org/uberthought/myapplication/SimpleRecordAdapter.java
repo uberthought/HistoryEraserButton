@@ -26,41 +26,49 @@ class SimpleRecordAdapter extends RecyclerView.Adapter<SimpleRecordAdapter.ViewH
     private final List<SimpleRecord> mItems = new ArrayList<>();
 
     SimpleRecordAdapter(Context context, String trackedItemName) {
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        DatabaseReference reference = database.getReference(user.getUid() + "/" + TrackedItem.class.getSimpleName() + "/" + trackedItemName);
+        FirebaseAuth.getInstance().addAuthStateListener(firebaseAuth -> {
+            FirebaseUser user = firebaseAuth.getCurrentUser();
 
-        reference.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Date date = dataSnapshot.getValue(Date.class);
-                mItems.add(new SimpleRecord(date));
+            if (user == null) {
+                mItems.clear();
                 SimpleRecordAdapter.this.notifyDataSetChanged();
-            }
+            } else {
+                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                DatabaseReference reference = database.getReference(user.getUid() + "/" + TrackedItem.class.getSimpleName() + "/" + trackedItemName);
 
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                Date date = dataSnapshot.getValue(Date.class);
-                mItems.removeIf(trackedItem -> trackedItem.getDate().equals(date));
-                mItems.add(new SimpleRecord(date));
-                SimpleRecordAdapter.this.notifyDataSetChanged();
-            }
+                reference.addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                        Date date = dataSnapshot.getValue(Date.class);
+                        mItems.add(new SimpleRecord(date));
+                        SimpleRecordAdapter.this.notifyDataSetChanged();
+                    }
 
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                Date date = dataSnapshot.getValue(Date.class);
-                mItems.removeIf(trackedItem -> trackedItem.getDate().equals(date));
-                SimpleRecordAdapter.this.notifyDataSetChanged();
-            }
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                        Date date = dataSnapshot.getValue(Date.class);
+                        mItems.removeIf(trackedItem -> trackedItem.getDate().equals(date));
+                        mItems.add(new SimpleRecord(date));
+                        SimpleRecordAdapter.this.notifyDataSetChanged();
+                    }
 
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {
+                        Date date = dataSnapshot.getValue(Date.class);
+                        mItems.removeIf(trackedItem -> trackedItem.getDate().equals(date));
+                        SimpleRecordAdapter.this.notifyDataSetChanged();
+                    }
 
-            }
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                    }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        mItems.clear();
+                        SimpleRecordAdapter.this.notifyDataSetChanged();
+                    }
+                });
             }
         });
     }

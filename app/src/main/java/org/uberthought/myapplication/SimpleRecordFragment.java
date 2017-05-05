@@ -16,6 +16,7 @@ public class SimpleRecordFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private SimpleRecordAdapter mAdapter;
 
+    private String TAG = "SimpleRecordAdapter";
 
     public static SimpleRecordFragment newInstance() {
         return new SimpleRecordFragment();
@@ -35,6 +36,17 @@ public class SimpleRecordFragment extends Fragment {
         mAdapter = new SimpleRecordAdapter(getContext(), mTrackedItemName);
         // Set CustomAdapter as the adapter for RecyclerView.
         mRecyclerView.setAdapter(mAdapter);
+
+        mAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onChanged() {
+                super.onChanged();
+                if (mAdapter != null && mAdapter.getItemCount() == 0) {
+                    mAdapter = null;
+                    getActivity().getFragmentManager().popBackStack();
+                }
+            }
+        });
 
         return rootView;
     }

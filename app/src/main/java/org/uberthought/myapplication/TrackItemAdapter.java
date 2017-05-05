@@ -25,50 +25,59 @@ class TrackItemAdapter extends RecyclerView.Adapter<TrackItemAdapter.ViewHolder>
 
     private final List<TrackedItem> mItems = new ArrayList<>();
     private RecyclerItemClickListener onClickListener;
+    private String TAG = "TrackItemAdapter";
 
     TrackItemAdapter(Context context) {
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        DatabaseReference reference = database.getReference(user.getUid() + "/" + TrackedItem.class.getSimpleName());
+        FirebaseAuth.getInstance().addAuthStateListener(firebaseAuth -> {
+            FirebaseUser user = firebaseAuth.getCurrentUser();
 
-        reference.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                String name = dataSnapshot.getKey();
-                long count = dataSnapshot.getChildrenCount();
-                mItems.add(new TrackedItem(name, count));
+            if (user == null) {
+                mItems.clear();
                 TrackItemAdapter.this.notifyDataSetChanged();
-            }
+            } else {
+                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                DatabaseReference reference = database.getReference(user.getUid() + "/" + TrackedItem.class.getSimpleName());
 
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                String name = dataSnapshot.getKey();
-                long count = dataSnapshot.getChildrenCount();
-                mItems.removeIf(trackedItem -> trackedItem.getName().equals(name));
-                mItems.add(new TrackedItem(name, count));
-                TrackItemAdapter.this.notifyDataSetChanged();
-            }
+                reference.addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                        String name = dataSnapshot.getKey();
+                        long count = dataSnapshot.getChildrenCount();
+                        mItems.add(new TrackedItem(name, count));
+                        TrackItemAdapter.this.notifyDataSetChanged();
+                    }
 
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                String name = dataSnapshot.getKey();
-                mItems.removeIf(trackedItem -> trackedItem.getName().equals(name));
-                TrackItemAdapter.this.notifyDataSetChanged();
-            }
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                        String name = dataSnapshot.getKey();
+                        long count = dataSnapshot.getChildrenCount();
+                        mItems.removeIf(trackedItem -> trackedItem.getName().equals(name));
+                        mItems.add(new TrackedItem(name, count));
+                        TrackItemAdapter.this.notifyDataSetChanged();
+                    }
 
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {
+                        String name = dataSnapshot.getKey();
+                        mItems.removeIf(trackedItem -> trackedItem.getName().equals(name));
+                        TrackItemAdapter.this.notifyDataSetChanged();
+                    }
 
-            }
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                    }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        mItems.clear();
+                        TrackItemAdapter.this.notifyDataSetChanged();
+                    }
+                });
             }
         });
     }
 
-    public static void addItem(String trackedItemName) {
+    static void addItem(String trackedItemName) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         DatabaseReference ref = database.getReference(user.getUid() + "/" + TrackedItem.class.getSimpleName() + "/" + trackedItemName);
