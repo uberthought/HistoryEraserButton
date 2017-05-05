@@ -1,8 +1,11 @@
 package org.uberthought.myapplication;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.Intent;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
@@ -11,6 +14,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
+
+import java.util.ArrayList;
 
 public class TrackedItemFragment extends Fragment {
 
@@ -36,7 +42,26 @@ public class TrackedItemFragment extends Fragment {
         mAdapter = createAdapter();
         mRecyclerView.setAdapter(mAdapter);
 
+        Button speechInputButton = (Button) rootView.findViewById(R.id.speech_input);
+        speechInputButton.setOnClickListener(v -> {
+            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Speech recognition demo");
+            startActivityForResult(intent, 1234);
+        });
+
         return rootView;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 1234 && resultCode == Activity.RESULT_OK) {
+            ArrayList<String> matches = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+            Toast.makeText(this.getContext(), matches.get(0), Toast.LENGTH_LONG).show();
+            TrackItemAdapter.addItem(matches.get(0));
+        }
     }
 
     @Override
@@ -52,7 +77,7 @@ public class TrackedItemFragment extends Fragment {
             input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
             builder.setView(input);
 
-            builder.setPositiveButton("OK", (dialog, which) -> mAdapter.addItem(input.getText().toString()));
+            builder.setPositiveButton("OK", (dialog, which) -> TrackItemAdapter.addItem(input.getText().toString()));
 
             builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
 

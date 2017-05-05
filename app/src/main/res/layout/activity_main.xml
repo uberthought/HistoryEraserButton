@@ -15,19 +15,8 @@
     <Button
         android:id="@+id/sign_out"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-    <Button
-        android:id="@+id/speech_input"
-        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/speech_input" />
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="New Text"
-        android:textAlignment="center" />
+        android:text="@string/sign_out" />
 
     <LinearLayout
         android:id="@+id/FragmentView"
